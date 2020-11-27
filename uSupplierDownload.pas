@@ -385,9 +385,12 @@ begin
    if ( Result ) then Exit;
          
    if ( (ThisRate = 0) and (Vatcodes.locate('TaxRate',ThisRate,[])) ) then
-      if VatCodes['TaxIDs'] = '0' then
-         ShowMessage('The only VAT code setup in Kingswood with a 0% VAT Rate is the VAT Exempt code.  Please set up another zero rated code')
-      else result := true;
+      begin
+         Result := ( VatCodes['TaxIDs'] <> '0' );
+         if ( not(Result) ) then
+            MessageDlg('The only VAT code setup in Kingswood with a 0% VAT Rate is the VAT Exempt code.'+cCRLF+
+                       'Please set up another zero rated code.',mtInformation,[mbOK],0);
+      end;
 end;
 
 function TfmSupplierDownload.IsNegOrPos(TestStr: ShortString): String;
