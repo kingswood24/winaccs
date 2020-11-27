@@ -366,16 +366,28 @@ begin
 end;
 
 function TfmSupplierDownload.FindVAT(ThisRate: Double): Boolean;
-var VATInclusive:char;
+var
+   VATInclusive:char;
 begin
-     VatCodes.First;
-    RESULT := FALSE;
-    If AccsDataModule.ImportDefaults['VATInclusive'] then VATInclusive := 'I' else VATInclusive:= 'E';
-    if ((ThisRate > 0) and (Vatcodes.locate('TaxRate;IncExc',varArrayOf([ThisRate,VATInclusive]),[]))) then result:=true
-     else if thisrate > 0 then showmessage('There is no matching VAT rate for ' + varToStr(ThisRate) + '%, VAT Type ' + VATInclusive +'.  Please setup or amend an existing VAT Rate code now');
-    if ((ThisRate = 0) and (Vatcodes.locate('TaxRate',ThisRate,[]))) then
-       if VatCodes['TaxIDs'] = '0' then showmessage('The only VAT code setup in Kingswood with a 0% VAT Rate is the VAT Exempt code.  Please set up another zero rated code')
-       else result := true;
+   VatCodes.First;
+   Result := False;
+   if AccsDataModule.ImportDefaults['VATInclusive'] then
+      VATInclusive := 'I'
+   else
+      VATInclusive:= 'E';
+
+   Result := ( (ThisRate > 0) and (Vatcodes.locate('TaxRate;IncExc',varArrayOf([ThisRate,VATInclusive]),[])) );
+
+   if ( not(Result) ) then
+      if ( ThisRate > 0 ) then
+         Result :=  ( MessageDlg('There is no matching VAT rate for ' + varToStr(ThisRate) + '%, VAT Type ' + VATInclusive +'.'+cCRLF+
+                                 'Do you want setup or amend an existing VAT Rate code now?',mtInformation,[mbYes, mbIgnore],0) = mrIgnore );
+   if ( Result ) then Exit;
+         
+   if ( (ThisRate = 0) and (Vatcodes.locate('TaxRate',ThisRate,[])) ) then
+      if VatCodes['TaxIDs'] = '0' then
+         ShowMessage('The only VAT code setup in Kingswood with a 0% VAT Rate is the VAT Exempt code.  Please set up another zero rated code')
+      else result := true;
 end;
 
 function TfmSupplierDownload.IsNegOrPos(TestStr: ShortString): String;
