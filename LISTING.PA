@@ -1,0 +1,959 @@
+{
+  Different Codes passed to LISTIT ListType Of
+          'S', Suppliers
+          'C', Customers
+          'G', Groups
+          'N', Nominal Accounts
+          'E' : Enterprise Accounts
+          'V' : VAT Codes
+          'I' : Used to list income accounts for EntRange ( Enterprises )
+          'A' : Analysis Codes
+          'L' : List Ledger Cards ( Use the Account String to pass the Current Account
+}
+
+unit Listing;
+
+interface
+
+uses
+  Types,
+  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  Forms, Dialogs, Grids, ExtCtrls, StdCtrls, Buttons;
+
+type
+  TListRec = Record
+    CustOrSupp  : Integer; { Record number of Cust/Supp for Ledger Listing }
+    ActiveDb    : Integer;
+    ListType    : Char;
+    AccRange    : TAccRange;
+    Ent         : ShortString;
+    Account     : ShortString;
+    ReturnValue : ShortString;
+  End;
+  TListBox = class(TForm)
+    List: TStringGrid;
+
+    Panel1: TPanel;
+    NewButton: TBitBtn;
+    Searchfield: TEdit;
+    Searchlabel: TLabel;
+    ListSelect: TBitBtn;
+    ListCancel: TBitBtn;
+    procedure FormActivate(Sender: TObject);
+    procedure ListSelectClick(Sender: TObject);
+    Procedure ListIt ( Sender: TObject; AccountType : TRange; ListType : Char );
+    Function  SetRanges ( Sender: TObject; Range : TRange ) : TAccRange;
+    Function CheckNom ( NomCode : ShortString; AccRange : TAccRange ) : Boolean;
+    Function NegitiveFlag ( NominalStr : ShortString; StringTochange : String ) : String;
+    Function CheckVAT ( VATCode : ShortString; Var ArrPos : Integer ) : Boolean;
+    Function Listok ( Substr, Bigstr : String; RecCounter : Integer ) : Boolean;
+    Procedure CalcTax ( ArrPos : Integer; Var VATAmt : ShortString;
+                    Var TaxAmt, NomAmt : Long; Var Exclusive : Boolean );
+    procedure NewButtonClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure ListClick(Sender: TObject);
+    procedure SearchfieldChange(Sender: TObject);
+    procedure SearchfieldKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    ListInfo    : TListRec;
+    searchfieldtext:string;
+  end;
+
+var
+  ListBox: TListBox;
+  FirstEXP,
+  Y: Integer;
+
+Implementation
+Uses
+    Stat,
+    AddRec,
+    SetUp,
+    Calcs,
+    DbGen,
+    Clears,
+    Util,
+    vars,
+    dbcore,
+    F3Search, Cashbook, accsdata;
+
+Var
+   GridPos : Integer;
+
+Procedure ListRecords; Forward;
+
+{$R *.DFM}
+
+procedure TListBox.FormActivate(Sender: TObject);
+begin
+     SearchField.text := '';
+     If SearchField.CanFocus Then begin
+        if length(searchfieldtext) >= 1 then Searchfield.text := searchfieldtext;
+        SearchField.SetFocus;
+        SearchField.SelStart := length(searchfieldtext);
+
+     end Else
+        List.SetFocus;
+
+     FirstEXP := 1;
+     ListInfo.ReturnValue := '';
+     List.ColWidths[0] := 50;
+
+
+     searchfieldtext := '';
+     GridPos := 1;
+     Case ListBox.ListInfo.ListType Of
+          'A',
+          'S',
+          'C',
+          'G',
+          'N',
+          'I',
+          'E' : Begin
+                     List.ColCount := 2;  { Nominal Account Groups }
+                     List.ColWidths[1] := List.ColWidths[0]*4;
+                End;
+          'L' : Begin
+                     List.ColCount := 3;
+                     List.ColWidths[0] := List.Font.Size * 8;
+                     List.ColWidths[1] := List.Font.Size * 5;
+                     List.ColWidths[2] := List.Font.Size * 12;
+                End;
+          'V' : Begin
+                     List.ColCount := 4;  { VAT Codes }
+                     List.ColWidths[0] := List.Font.Size * 3;
+                     List.ColWidths[1] := List.Font.Size * 5;
+                     List.ColWidths[2] := List.Font.Size * 7;
+                     List.ColWidths[3] := List.Font.Size * 10;
+
+                End;
+     End;
+     If List.RowCount > 1 Then
+        List.Row := 1;
+     ListRecords;
+end;
+
+procedure ListSearch ( ItemFrom, ItemTo : Integer; var GridPos : Integer);                                                  {Search Function Using Case statement}
+Var
+      RecCounter : Integer;
+      RecOk : Boolean;
+      TotAmt : Long;
+Begin
+     RecOk := False;
+     With ListBox.ListInfo Do
+          Begin
+               RecCounter := ItemFrom;
+               If ItemFrom > 0 Then
+                  {For RecCounter := ItemFrom to ItemTo do}
+                  While ( RecCounter <= ItemTo ) Do
+                      Begin
+                           Case ListType Of
+                           'C',
+                           'S':If F3SearchForm.Active then
+                                  Begin
+                                     ReadRec ( ListBox.ListInfo.ActiveDb, RecCounter );
+                                     dberr;
+                                     RecOk := RecActive ( ListBox.ListInfo.ActiveDb );
+                                     if RecOk then
+                                        getItem ( ListBox.listInfo.ActiveDb, 1 );
+                                   End
+                                Else
+
+                                Begin
+                                     ReadRec ( ListBox.ListInfo.ActiveDb, RecCounter );
+                                     dberr;
+                                     RecOk := RecActive ( ListBox.ListInfo.ActiveDb );
+                                     if RecOk then
+                                        getItem ( ListBox.listInfo.ActiveDb, 1 );
+                                End;
+                           'I',
+                           'N': Begin
+                                     ReadRec ( ListBox.ListInfo.ActiveDb, RecCounter );
+                                     dberr;
+                                     RecOk := RecActive ( ListBox.ListInfo.ActiveDb )
+                                            And ( not ExcludeNominal ( RecCounter ) );
+                                     if RecOk then
+                                        getItem ( ListBox.listInfo.ActiveDb, 1 );
+                                End;
+                           'G': Begin
+                                     If not ExcludeNominal ( RecCounter ) then
+                                          Begin
+                                               ReadTables ( ListBox.ListInfo.ActiveDb, RecCounter, CurrStr );
+                                               SlimAll ( CurrStr );
+                                               RecOk := Length ( CurrStr ) > 0;
+                                          End;
+                                End;
+                           'E': Begin
+                                     ReadRec ( ListBox.ListInfo.ActiveDb, RecCounter -1 );    // TGM AB -1 as first record is 0
+                                     dberr;
+                                     RecOk := RecActive ( ListBox.ListInfo.ActiveDb );
+                                     if RecOk then
+                                        getItem ( ListBox.listInfo.ActiveDb, 2 );
+                                End;
+                           'A': Begin
+                                     ReadRec ( ListBox.ListInfo.ActiveDb, RecCounter );
+                                     dberr;
+                                     RecOk := RecActive ( ListBox.ListInfo.ActiveDb );
+                                     if RecOk then
+                                        getItem ( ListBox.listInfo.ActiveDb, 2 );
+                                End;
+                           'L': Begin
+                                     ReadRec ( TxFile, RecCounter );
+                                     dberr;
+                                     RecOk := RecActive ( ActiveDb );
+                                     If RecOk Then
+                                        RecOK := CheckEditStatus;
+                                     GetItem ( TxFile, 16 );
+                                     If CurrInt <= 0 Then
+                                        RecCounter := ItemTo + 1
+                                     Else
+                                         RecCounter := CurrInt;
+                                     If RecOK Then
+                                        GetItem ( TxFile, 2 );
+                                End;
+                           End;
+
+                           If RecOk then
+                              Begin
+                                   If listBox.listOk ( ListBox.SearchField.Text, CurrStr, RecCounter ) then
+                                      Begin
+                                           If ListType = 'E' Then
+                                              Begin
+                                                   GetItem ( ActiveDb, 1 );
+                                                   ListBox.List.Cells [0, GridPos] := CurrStr;
+                                                   GetItem ( ActiveDb, 2 );
+                                                   ListBox.List.Cells [1, GridPos] := Copy ( CurrStr, 1, 16 );
+                                              End
+                                           Else
+                                               If ( ListType = 'L' ) Then
+                                                  Begin
+                                                     GetItem ( TxFile, 2 );
+                                                     ListBox.List.Cells [0, GridPos] := CurrStr;
+                                                     GetItem ( TxFile, 1 );
+                                                     Case CurrInt Of
+                                                          1,
+                                                          5 : ListBox.List.Cells [1, GridPos] := 'INV';
+                                                          2,
+                                                          6 : ListBox.List.Cells [1, GridPos] := 'PAY';
+                                                          3,
+                                                          7 : ListBox.List.Cells [1, GridPos] := 'CRN';
+                                                     End;
+                                                     GetItem ( TxFile, 9 );
+                                                     TotAmt := CurrLong;
+                                                     GetItem ( TxFile, 11 );
+                                                     TotAmt := CurrLong + TotAmt;
+                                                     LongStr ( TotAmt, CurrStr, 'L' );
+                                                     ListBox.List.Cells [2, GridPos] := CurrStr;
+                                                  End
+                                               Else
+                                                  Begin
+                                                     If ((RecCounter <= cash1.XNOMNONFROM) And (Ent <> '')) or
+                                                        ((Reccounter < cash1.XNOMOHFROM) And ( Ent = '' )) Then
+                                                         FirstEXP := GridPos;
+                                                     {Else
+                                                        FirstEXP := 0;}
+
+
+//                                                     If (CashBookForm.PaymentReceipt.Checked) and Then
+//                                                        FirstExp := 0;
+
+                                                     ListBox.List.Cells [0, GridPos] := IntTostr ( RecCounter );
+                                                     ListBox.List.Cells [1, GridPos] := CurrStr;
+                                                  End;
+                                           Inc ( GridPos );
+                                      End;
+                              End;
+                           If ( ListType <> 'L' ) Then
+                               Inc ( RecCounter );
+                      End;
+               ListBox.List.RowCount := GridPos;
+
+
+               If GridPos <= 1 Then
+                  Begin
+                       Listbox.List.RowCount := 2;
+                       Listbox.List.Cells[0,1] := ' ';
+                       Listbox.List.Cells[1,1] := ' ';
+                       If ListType = 'L' Then
+                          Listbox.List.Cells[2,1] := ' ';
+                       Listbox.List.FixedRows := 1;
+                       ListBox.List.Row := 1;
+                  End;
+          End;
+End;
+                                                           {end of Listsearch}
+
+Procedure FillGroupGrid;
+Begin
+     ListBox.Caption := 'List Account Groups';
+     ListBox.List.Cells[0,0] := 'No';
+     ListBox.List.Cells[1,0] := 'Name';
+     GridPos := 1;
+     ListSearch ( ListBox.ListInfo.AccRange[1], ListBox.ListInfo.AccRange[2], GridPos );
+     ListSearch ( ListBox.ListInfo.AccRange[3], ListBox.ListInfo.AccRange[4], GridPos );
+     ListSearch ( ListBox.ListInfo.AccRange[5], ListBox.ListInfo.AccRange[6], GridPos );
+End;
+
+{
+Fill the Grid with info from the Customer or Supplier File
+Depends on Listtype in the ListBox.ListInfo Record Structure
+}
+Procedure FillCustSuppGrid;
+Begin
+     If (ListBox.ListInfo.ListType = 'C') Then
+        ListBox.Caption := 'List Customer Accounts'
+     Else
+         ListBox.Caption := 'List Supplier Accounts';
+     ListBox.List.Cells[0,0] := 'No';
+     ListBox.List.Cells[1,0] := 'Name';
+     GridPos := 1;
+
+     With ListBox.ListInfo Do
+          ListSearch ( AccRange[1], AccRange[2], GridPos );
+End;
+
+{
+Fill the grid with info from Nominal ledger File
+Uses AccRange From the ListBox.Listinfo Record Structure
+}
+Procedure FillNomGrid;
+Begin
+
+     ListBox.Caption := 'List Nominal Accounts';
+     ListBox.List.Cells[0,0] := 'No';
+     ListBox.List.Cells[1,0] := 'Name';
+     GridPos := 1;
+     FirstExp := 0;
+
+     With ListBox.ListInfo Do
+          Begin
+               { Get the Account Ranges }
+               ListSearch ( AccRange[1], AccRange[2], GridPos );
+               ListSearch ( AccRange[3], AccRange[4], GridPos );
+               ListSearch ( AccRange[5], AccRange[6], GridPos );
+          End;
+     If ( PROG = CASHEXP ) Or ( PROG = PurchTx ) Then
+        Begin
+            Inc (FirstExp);
+            ListBox.List.TopRow := FirstExp;
+            ListBox.List.Row := FirstEXP;
+        End;
+End;
+
+{
+Fill the Grid with info for a Customer or Supplier Ledger Card
+Depends on Listtype in the ListBox.ListInfo Record Structure
+}
+Procedure FillLedgerCardsGrid;
+Var
+   ActiveRec,
+   CurrTx : Integer;
+Begin
+     If ( ListBox.ListInfo.ActiveDb = SLFile ) Then
+        ListBox.Caption := 'List Customer Ledger Cards'
+     Else
+         ListBox.Caption := 'List Supplier Ledger Cards';
+     ListBox.List.Cells[0,0] := 'Date';
+     ListBox.List.Cells[1,0] := 'Type';
+     ListBox.List.Cells[2,0] := 'Amount';
+     GridPos := 1;
+
+{-->>     ActiveRec := 0;}
+     CurrTx := 0;
+
+     SlimAll ( ListBox.ListInfo.Account );
+     If Numeric ( ListBox.ListInfo.Account ) Then
+        Begin
+           SetDb ( ListBox.ListInfo.ActiveDb );
+           ReadRec ( ListBox.ListInfo.ActiveDb, StrToInt ( ListBox.ListInfo.Account ));
+           dberr;
+           If RecActive ( ListBox.ListInfo.ActiveDb ) Then
+              Begin
+                 GetItem ( ListBox.ListInfo.ActiveDb, 14 );
+                 If CurrInt <> 0 Then
+                    CurrTx := CurrInt;
+                 GetItem ( ListBox.ListInfo.ActiveDb, 15 );
+                 If CurrInt <> 0 Then
+                    ActiveRec := CurrInt
+                 Else
+                     ActiveRec := CurrTx;
+                 If CurrTx = 0 Then
+                    CurrTx := ActiveRec;
+              End;
+           SetDb ( TxFile );
+           With ListBox.ListInfo Do
+              ListSearch ( CurrTx, db1.dbrechigh, GridPos );
+        End;
+End;
+
+{
+Fill the Grid with info from the Analysis File
+}
+Procedure FillAnalysisGrid;
+var
+   i : integer;
+Begin
+     ListBox.Caption := 'List Analysis Codes';
+     ListBox.List.Cells[0,0] := 'No';
+     ListBox.List.Cells[1,0] := 'Name';
+     GridPos := 1;
+
+     With ListBox.ListInfo Do
+          ListSearch ( AccRange[1], AccRange[2], GridPos );
+       
+End;
+
+{
+Fill the Grid with info from the Nominal File based on the income and
+expenditure ranges set up within the enterprise
+}
+Procedure FillEntGrid;
+Begin
+     ListBox.Caption := 'List Enterprise Accounts';
+     ListBox.List.Cells[0,0] := 'Code';
+     ListBox.List.Cells[1,0] := 'Name';
+     GridPos := 1;
+     ListSearch ( ListBox.ListInfo.AccRange[1], ListBox.ListInfo.AccRange[2], GridPos );
+End;
+
+{
+Fill the Grid with info from the Cashbook Definition File re VAT Codes, Rates
+}
+Procedure FillVATGrid;
+Var
+   RecCounter : Integer;
+   TempRate   : Real;
+Begin
+     ListBox.List.ColCount := 4;
+     ListBox.Caption := 'List VAT Codes';
+     ListBox.List.Cells[0,0] := 'Code';
+     ListBox.List.Cells[1,0] := 'Rate';
+     ListBox.List.Cells[2,0] := '';
+     ListBox.List.Cells[3,0] := 'Description';
+
+     GridPos := 1;
+     For RecCounter := 0 To 9 Do
+         Begin
+              If Length ( Cash1.xTaxIds[RecCounter] ) > 0 Then
+                 Begin
+                      ListBox.List.Cells[0,GridPos] := Cash1.xTaxIds[RecCounter];
+                      TempRate := Cash1.xTaxRates[RecCounter] / 100;
+                      ListBox.List.Cells[1,GridPos] := Format ( '%f', [TempRate]); {FloatToStrF ( TempRate, ffFixed, 2, 2 );}
+                      If Cash2.xTaxTypes[RecCounter] = 'I' Then
+                         ListBox.List.Cells[2,GridPos] := 'Inclusive'
+                      Else If Cash2.xTaxTypes[RecCounter] = 'E' Then
+                         ListBox.List.Cells[2,GridPos] := 'Exclusive';
+                      ListBox.List.Cells[3,GridPos] := Cash11.vat_desc[RecCounter];
+                      Inc ( GridPos );
+                 End;
+         End;
+     ListBox.List.RowCount := GridPos;
+End;
+
+Procedure ListRecords;
+Begin
+     With ListBox.ListInfo Do
+          Begin
+               If ActiveDb > 0 Then
+                  SetDb ( ActiveDb );
+               Case ListType Of
+                    'A' : FillAnalysisGrid;
+                    'G' : FillGroupGrid;
+                    'V' : FillVATGrid;
+                    'I',
+                    'N' : FillNomGrid;
+                    'E' : FillEntGrid;
+                    'S',
+                    'C' : FillCustSuppGrid;
+                    'L' : FillLedgerCardsGrid;
+               End;
+        End;
+End;
+
+procedure TListBox.ListSelectClick(Sender: TObject);
+begin
+     If (Listinfo.ListType = 'L') Then { Ledger Cards }
+        ListInfo.ReturnValue := List.Cells[2,List.Row]
+     Else
+         ListInfo.ReturnValue := List.Cells[0,List.Row];
+     SlimAll ( ListInfo.ReturnValue );
+     ModalResult := mrCancel;
+end;
+
+{
+Set the range from and to based on the type of Nominal ledger listing the user is requesting
+}
+Function TListBox.SetRanges ( Sender: TObject; Range : TRange ) : TAccRange;
+Var
+   LastEnt,
+   EntRecord : Integer;
+Begin
+     SetRanges[1] := 0;
+     SetRanges[2] := 0;
+     SetRanges[3] := 0;
+     SetRanges[4] := 0;
+     SetRanges[5] := 0;
+     SetRanges[6] := 0;
+
+     ListBox.ListInfo.ActiveDb := NlFile;
+
+     If ( Range = AllNoms ) Then
+        Begin
+             SetRanges[1] := 1;
+             SetRanges[2] := Cash1.xNomPrvExp+Cash11.xNo_Of_Partners;
+        End
+     Else If ( Range = AllNomsPlusCapital ) Then
+        Begin
+             SetDb ( NlFile );
+             SetRanges[1] := 1;
+             SetRanges[2] := DB1.DBRECTOT;
+             SetRanges[3] := 0;
+             SetRanges[4] := 0;
+             SetRanges[5] := 0;
+             SetRanges[6] := 0;
+        End
+     Else If ( Range = AllNomsXBank ) Then
+        Begin
+             SetRanges[1] := 1;
+             SetRanges[2] := Cash1.xNomCato;
+             SetRanges[3] := Cash1.xNomFaTo+1;
+             SetRanges[4] := Cash1.xNomLiTo;
+             SetRanges[5] := Cash1.xNomPrvInc;
+             SetRanges[6] := Cash1.xNomPrvExp+Cash11.xNo_Of_Partners;
+        End
+     Else If ( Range = NonEnt ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomNonFrom;
+             SetRanges[2] := Cash1.xNomNonTo;
+        End
+     Else If ( Range = Liab ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomLiFrom;
+             SetRanges[2] := Cash1.xNomLiTo;
+        End
+     Else If ( Range = Banks ) Then
+        Begin
+             SetRanges[1] := Cash1.xBankMin;
+             SetRanges[2] := Cash1.xBankMax;
+        End
+     Else If ( Range = FAsset ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomFaFrom;
+             SetRanges[2] := Cash1.xNomFaTo;
+        End
+     Else If ( Range = CAsset ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomCaFrom;
+             SetRanges[2] := Cash1.xNomCaTo;
+        End
+     Else If ( Range = OverHeads ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomOhFrom;
+             SetRanges[2] := Cash1.xNomOhTo;
+        End
+     Else If ( Range = OverHeadsWithExpense ) Then
+        Begin
+             SetRanges[1] := Cash1.xNomExpFrom;
+             SetRanges[2] := Cash1.xNomExpTo;
+             SetRanges[3] := Cash1.xNomOhFrom;
+             SetRanges[4] := Cash1.xNomOhTo;
+        End
+     Else If ( Range = EntRange ) Then
+        Begin
+             SlimAll ( ListBox.ListInfo.Ent );
+             EntRecord := 1;
+             SetRanges[1] := 1;
+             SetRanges[2] := Cash1.xNomPrvExp+Cash11.xNo_Of_Partners;
+             SetDb ( EntFile );
+             LastEnt := db1.dbrechigh;
+             While ( EntRecord <= LastEnt ) Do
+                   Begin
+                        ReadRec ( EntFile, EntRecord );
+                        dberr;
+                        If RecActive ( EntFile ) Then
+                           Begin
+                                GetItem ( EntFile, 1 );
+                                SlimAll ( CurrStr );
+                                If ( CurrStr = ListBox.ListInfo.Ent ) Then
+                                   Begin
+                                        GetItem ( EntFile, 6 );
+                                        SetRanges[1] := CurrInt;
+                                        GetItem ( EntFile, 7 );
+                                        SetRanges[2] := CurrInt;
+                                        If ( ListBox.ListInfo.ListType <> 'I' ) Then
+                                           Begin
+                                                GetItem ( EntFile, 8 );
+                                                SetRanges[3] := CurrInt;
+                                                GetItem ( EntFile, 9 );
+                                                SetRanges[4] := CurrInt;
+                                           End;
+                                   End;
+                           End;
+                        Inc ( EntRecord );
+                   End;
+        End
+     Else If ( Range = Enterprise ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := EntFile;
+             SetDb ( EntFile );
+             SetRanges[1] := 1;
+             SetRanges[2] := db1.dbrectot;
+        End
+     Else If ( Range = Customers ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := SlFile;
+             SetDb ( SlFile );
+             SetRanges[1] := 1;
+             SetRanges[2] := Accsdatamodule.SLFileDB.RecordCount; // db1.dbrectot;    TGM AB
+        End
+     Else If ( Range = Suppliers ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := PlFile;
+             SetDb ( PlFile );
+             SetRanges[1] := 1;
+             SetRanges[2] := Accsdatamodule.PLFileDB.RecordCount; //db1.dbrectot;      TGM AB
+        End
+     Else If ( Range = Analysis ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := AnalFile;
+             SetDb ( AnalFile );
+             SetRanges[1] := 1;
+             SetRanges[2] := db1.dbrectot;
+        End
+     Else If ( Range = CustLedgerCards ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := SlFile;
+             SetDb ( ListBox.ListInfo.ActiveDb );
+             SetRanges[1] := 1;
+             SetRanges[2] := db1.dbrectot;
+        End
+     Else If ( Range = EntAllIncome ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := NlFile;
+             SetDb ( ListBox.ListInfo.ActiveDb );
+             SetRanges[1] := Cash1.XNOMINCFROM;
+             SetRanges[2] := Cash1.XNOMINCTO;
+        End
+     Else If ( Range = EntAllExpend ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := NlFile;
+             SetDb ( ListBox.ListInfo.ActiveDb );
+             SetRanges[1] := Cash1.XNOMExpFROM;
+             SetRanges[2] := Cash1.XNOMExpTO;
+        End
+     Else If ( Range = SuppLedgerCards ) Then
+        Begin
+             ListBox.ListInfo.ActiveDb := PLFile;
+             SetDb ( ListBox.ListInfo.ActiveDb );
+             SetRanges[1] := 1;
+             SetRanges[2] := db1.dbrectot;
+        End;
+End;
+
+Procedure TListBox.ListIt ( Sender: TObject; AccountType : TRange; ListType : Char );
+Begin
+     InitRange ( ListBox.ListInfo.AccRange );
+     ListBox.ListInfo.ListType := ListType;
+     ListBox.ListInfo.AccRange := SetRanges ( Sender, AccountType );
+     ListBox.ShowModal;
+End;
+
+Function TListBox.CheckNom ( NomCode : ShortString; AccRange : TAccRange ) : Boolean;
+Var
+   NomAccount,
+   LastNom   : Integer;
+   NominalOK,
+   ActiveRecord,
+   UseRanges : Boolean;
+
+Begin
+{-->>     CheckNom := False;}
+     NominalOK := False;
+     ActiveRecord := False;
+     SlimAll ( NomCode );
+     If Numeric ( NomCode ) Then
+        Begin
+             UseRanges := False;
+             NomAccount := StrToInt ( NomCode );
+             SetDb ( NlFile );
+             LastNom := db1.dbrechigh;
+             If AccRange[2] > 0 Then
+                Begin
+                     LastNom := AccRange[2];
+                     UseRanges := True;
+                End;
+             If AccRange[4] > 0 Then
+                Begin
+                     LastNom := AccRange[4];
+                     UseRanges := True;
+                End;
+             If ( NomAccount <= LastNom ) Then
+                Begin
+                     ReadRec ( NlFile, NomAccount );
+                     dberr;
+                     ActiveRecord := RecActive ( NlFile );
+                End;
+
+             NominalOK := (( ActiveRecord ) And ( NOT UseRanges )) Or
+                         (( ActiveRecord ) And ( UseRanges ) And
+                         (( NomAccount >= AccRange[1] ) And
+                          ( NomAccount <= AccRange[2] )) Or
+                         (( NomAccount >= AccRange[3] ) And
+                          ( NomAccount <= AccRange[4] )));
+        End
+     Else
+         If Length ( NomCode ) = 0 Then
+            NominalOK := True;
+     CheckNom := NominalOK;
+End;
+
+Function TListBox.NegitiveFlag ( NominalStr : ShortString; StringTochange : String ) : String;
+Var
+   NomAccount : LongInt;
+   TestStr : ShortString;
+   Neg : Boolean;
+Begin
+   NegitiveFlag := StringToChange;
+   SlimAll ( NominalStr );
+   If Numeric ( NominalStr ) Then
+      NomAccount := StrToInt ( NominalStr )
+   Else
+       NomAccount := 0;
+   Neg := False;
+   IF (PROG IN [CASHINC,CASHEXP,SALESTX,PURCHTX]) AND
+     (( NomAccount >= Cash1.XNOMPRVINC ) AND
+      ( NomAccount <= Cash1.XNOMPRVEXP+Cash11.xno_of_partners )) THEN
+      BEGIN
+         CASE PROG OF
+            CASHINC,SALESTX : NEG:=(( NomAccount >=Cash1.XNOMPRVEXP) And
+			     ( NomAccount <=Cash1.xnomprvexp+Cash11.xno_of_partners ));
+            CASHEXP,PURCHTX : NEG:=(( NomAccount >=Cash1.XNOMPRVINC) And
+			     ( NomAccount <=Cash1.xnomprvinc+Cash11.xno_of_partners ));
+         END;
+      END
+   ELSE
+      NEG:= (( PROG IN [CASHINC,SALESTX] ) AND
+            (( NomAccount < Cash1.XNOMINCFROM ) OR
+             ( NomAccount > Cash1.XNOMNONTO )) AND
+            (( NomAccount > Cash1.XNOMEXPFROM-1 ) AND
+             ( NomAccount < Cash1.XNOMOHTO+1 )) ) OR
+
+            (( PROG IN [CASHEXP,PURCHTX] ) AND
+            (( NomAccount < Cash1.XNOMEXPFROM ) OR
+             ( NomAccount > Cash1.XNOMOHTO )) AND
+	    (( NomAccount > Cash1.XNOMINCFROM-1 ) AND
+	     ( NomAccount < Cash1.XNOMNONTO+1 )));
+
+   If NEG And ( NomAccount >= 1 ) And ( NomAccount <= 9999 ) Then
+      Begin
+           TestStr := StringToChange;{CashBookForm.DetailGrid.Cells[4, Row];}
+           SlimAll ( TestStr );
+           If ( Pos ( '-', TestStr ) = 0 ) Then
+              NegitiveFlag := TestStr + '-';{CashBookForm.DetailGrid.Cells[4, Row] := }
+      End;
+End;
+
+Function TListBox.CheckVAT ( VATCode : ShortString; Var ArrPos : Integer ) : Boolean;
+Var
+   FoundPos,
+   RecCounter : Integer;
+Begin
+     CheckVAT := False;
+     RecCounter := 0;
+     FoundPos   := -1;
+     ArrPos := 0;
+
+     SlimAll ( VATCode );
+     If Length ( VATCode ) <> 0 Then
+        Begin
+           While ( RecCounter <= 9 ) Do
+              Begin
+                   If Length ( Cash1.xTaxIds[RecCounter] ) > 0 Then
+                      Begin
+                           If Cash1.xTaxids[RecCounter] = VATCode Then
+                              Begin
+                                   CheckVAT := True;
+                                   FoundPos := RecCounter;
+                                   RecCounter := 9;
+
+                              End;
+                      End;
+                   Inc ( RecCounter );
+              End;
+        End;
+
+     If FoundPos <> -1 Then
+        ArrPos := FoundPos;
+
+End;
+
+Procedure TListBox.CalcTax ( ArrPos : Integer; Var VATAmt : ShortString;
+                             Var TaxAmt, NomAmt : Long; Var Exclusive : Boolean );
+Var
+   TmpVAT,
+   TmpAmt,
+   VRate,
+   Wk     : Double;
+{-->>   Save,}
+   Rate   : Long;
+   Method : Integer;
+Begin
+     VATAmt := '';
+     Method := 1;
+     Rate := Cash1.xTaxRates[ArrPos];
+     If Cash2.xTaxTypes[ArrPos] = 'E' Then Method := 1;
+     If Cash2.xTaxTypes[ArrPos] = 'I' Then Method := 2;
+
+     If METHOD=0 Then
+        If (Cash1.XCALCSTAX AND (PROG IN [CASHINC,SALESTX])) Or
+           (Cash1.XCALCPTAX AND (PROG IN [CASHEXP,PURCHTX])) Or
+           (Cash1.XCALCJTAX AND (PROG IN [JOURNAL	   ])) THEN METHOD:=1;
+     If METHOD=0 Then
+        If (Cash1.XGROSSSL  AND (PROG IN [CASHINC,SALESTX])) Or
+           (Cash1.XGROSSPL  AND (PROG IN [CASHEXP,PURCHTX])) Or
+           (Cash1.XGROSSJL  AND (PROG IN [JOURNAL	   ])) THEN METHOD:=2;
+     Exclusive := ( Method = 1 );
+     If METHOD=1 THEN
+        Begin
+             (* check XCOUNTRY CODE AND only used for UK *)
+             If (( Cash2.XCOUNTRY = 1 ) and ( Cash1.XTAXIDS[ArrPos] = 'E' ) And
+                 ( RATE = 0 )) then
+                 TAXAMT := 0;
+
+             If NomAmt>0 THEN
+                Begin
+                     WK := NomAmt/100;
+{-->>                     TmpAmt := WK;}
+                     VRate := Rate/100;
+                     WK := ((WK * VRate) / 100);
+                     TaxAmt := Round (WK*100);
+                End;
+             IF NomAmt < 0 THEN
+                Begin
+                     NomAmt := 0-NomAmt;
+
+
+                     WK := NomAmt/100;
+{-->>                     TmpAmt := WK;}
+                     VRate := Rate/100;
+                     WK := ((WK * VRate) / 100);
+                     TaxAmt := Round (WK*100);
+                     NomAmt := 0-NomAmt;
+                     TAXAMT :=0-TAXAMT;
+                End;
+             EXIT;
+        End;
+     If METHOD=2 Then
+        Begin
+{-->>             SAVE:=NomAmt;}
+             If NomAmt > 0 Then
+                Begin
+                     WK := NomAmt/100;
+                     TmpAmt := WK;
+                     VRate := Rate/100;
+                     WK := ((WK / (100+ VRate)) * 100);
+                     TmpVAT := TmpAmt - WK;
+                     TaxAmt := Round (TmpVAT*100);
+                     NomAmt := (Round (WK*100));
+                End;
+             If NomAmt < 0 THEN
+                Begin
+                     WK := 0-(NomAmt/100);
+                     TmpAmt := WK;
+                     VRate := Rate/100;
+                     WK := ((WK / (100+ VRate)) * 100);
+                     TmpVAT := TmpAmt - WK;
+                     TaxAmt := 0-(Round (TmpVAT*100));
+                     NomAmt := 0-(Round (WK*100));
+                End;
+        End;
+End;
+
+procedure TListBox.NewButtonClick(Sender: TObject);
+begin
+            { Call the Data Input Form }
+            AddRecForm.ShowModal;
+            { Re-list the information in the List if new record added }
+            If AddRecForm.MadeNewRec Then
+               ListRecords;
+end;
+
+procedure TListBox.FormShow(Sender: TObject);
+begin
+     { Hide the New Button for Enterprises, VAT and Groups }
+     If ( ListBox.ListInfo.ListType In ['E','V','G','L'] ) Then
+        NewButton.Hide
+     Else
+        NewButton.Show;
+     If ( ListBox.ListInfo.ListType = 'V' ) Then
+        Begin
+             SearchField.Hide;
+             Searchlabel.Hide;
+        End
+     Else
+        Begin
+             SearchField.Show;
+             Searchlabel.Show;
+        End
+end;
+
+function TListBox.Listok ( Substr, Bigstr : String; RecCounter : Integer ) : Boolean;
+var
+   x,y : integer;
+Begin
+     If substr=Null then
+        begin
+             Listok := True;
+             Exit  ;
+        end;
+
+     For x:=1 to Length(Substr) do
+         If (ord (Substr [x]) >= 97) and
+            (ord (Substr [x]) <=122) Then Substr [x] :=CHR(ord(Substr [x] ) - 32);
+     For x:=1 to Length(Bigstr) do
+         If (ord (Bigstr [x]) >= 97) and
+            (ord (Bigstr [x]) <=122) Then Bigstr [x] :=CHR(ord(Bigstr [x] ) - 32);
+
+     Listok := POS(Substr, Bigstr) > 0;
+
+     if RecCounter <> 9999999 then begin
+
+        try y := strtoint(substr);
+            if (Substr = vartostr(RecCounter)) then listok:= True;
+            Listok := POS(Substr, vartostr(RecCounter)) = 1;
+        except
+        end;
+     end;
+end;
+
+procedure TListBox.ListClick(Sender : TObject);
+begin
+     ListBox.List.FixedRows := 1;
+end;
+
+procedure TListBox.SearchfieldChange(Sender : TObject);
+begin
+     ListRecords;
+end;
+
+procedure TListBox.SearchfieldKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+     If (Key = VK_UP)    or   // Up Arrow Key
+        (Key = VK_DOWN)  or   // Down Arrow Key
+        (Key = VK_PRIOR) or   // Page_Up Key
+        (Key = VK_NEXT)  Then // Page_Down Key
+        List.SetFocus;
+end;
+
+procedure TListBox.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+     ListBox.ListInfo.ListType := ' ';
+end;
+
+end.

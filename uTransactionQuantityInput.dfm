@@ -1,0 +1,111 @@
+object fmTransactionQuantityInput: TfmTransactionQuantityInput
+  Left = 408
+  Top = 238
+  BorderStyle = bsDialog
+  Caption = 'Enter Quantity Value(s)'
+  ClientHeight = 166
+  ClientWidth = 235
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  OnClose = FormClose
+  OnKeyDown = FormKeyDown
+  PixelsPerInch = 96
+  TextHeight = 17
+  object cxGroupBox1: TcxGroupBox
+    Left = 10
+    Top = 8
+    Caption = 'Quantities'
+    TabOrder = 0
+    Height = 107
+    Width = 213
+    object lQuantity2: TcxLabel
+      Left = 24
+      Top = 29
+      AutoSize = False
+      Caption = 'Quantity2'
+      Properties.Alignment.Horz = taRightJustify
+      Properties.Alignment.Vert = taVCenter
+      Height = 21
+      Width = 75
+    end
+    object lQuantity3: TcxLabel
+      Left = 24
+      Top = 65
+      AutoSize = False
+      Caption = 'Quantity3'
+      Properties.Alignment.Horz = taRightJustify
+      Properties.Alignment.Vert = taVCenter
+      Height = 21
+      Width = 75
+    end
+    object ceQuantity2: TcxCurrencyEdit
+      Left = 105
+      Top = 29
+      EditValue = 0
+      Properties.Alignment.Horz = taRightJustify
+      Properties.Alignment.Vert = taVCenter
+      Properties.AssignedValues.DisplayFormat = True
+      Properties.DecimalPlaces = 2
+      Properties.Nullable = False
+      Properties.NullString = '0'
+      Properties.OnEditValueChanged = ceQuantity2PropertiesEditValueChanged
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = False
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = False
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = False
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = False
+      TabOrder = 2
+      Width = 81
+    end
+    object ceQuantity3: TcxCurrencyEdit
+      Left = 105
+      Top = 65
+      EditValue = 0
+      Properties.Alignment.Horz = taRightJustify
+      Properties.Alignment.Vert = taVCenter
+      Properties.AssignedValues.DisplayFormat = True
+      Properties.DecimalPlaces = 2
+      Properties.Nullable = False
+      Properties.NullString = '0'
+      Properties.OnEditValueChanged = ceQuantity3PropertiesEditValueChanged
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = False
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = False
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = False
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = False
+      TabOrder = 3
+      Width = 81
+    end
+  end
+  object btnOK: TcxButton
+    Left = 70
+    Top = 122
+    Width = 75
+    Height = 32
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object btnCancel: TcxButton
+    Left = 148
+    Top = 122
+    Width = 75
+    Height = 32
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end

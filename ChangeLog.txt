@@ -1,0 +1,1067 @@
+[V4.5 R4.6] -
+   13/11/20 /MK Change - MainUnit - FormActivate - Don't show BankLinkTimer anymore instead show BankLink select file screen and then show AppInfo and NewFeatures screen.
+                                  - Bold the company name in the status bar - TGM request.    
+   26/11/20 /MK Change - uDataBackup - FormCreate - If the user is an accountant then default the BackupFileName to the Cashbook directory name.
+                       - uBankLinkNoFileFound - Added a "Don't show this again" option - Milo Murphy/Kieran Ryan.
+                       - MainUnit - ShowBankLink - Only show TfmBankLinkNoFileFound if user hasn't ticked "Don't show this again".
+                       - AccsData - CreatePreferenceDefaults - Default new ShowBankLinkFileNotFound pref to True so TfmBankLinkNoFileFound appears before user can press "Don't show this again".
+                       - uPreferenceConsts - New const for ShowBankLinkFileNotFound.
+
+[V4.5 R4.5] -
+   20/10/20 /MK Change - MainUnit, NewRepUnit - Changed the word log in credentials on the prompt that appears to Username and Password - TGM request.
+
+[V4.5 R4.4] -
+   19/10/20 /MK Change - uBankImport - Added conts for Transaction Type.
+                                     - Added new Bank Transfer Transaction Type.
+                                     - FindAndPostNominal - If the Transaction Type is Bank Transfer then show banks listing, if the user selects the
+                                                            same bank account as the transactions are being imported to give error and
+                                                            don't allow the nominal to be set as this bank.
+                                     - StoreNominalSelection - For Bank Transfer transactions set the Nominal and clear out the Enterprise.
+                                     - erTransactionTypesPropertiesChange - If the Transaction Type is bank transfer then turn off the IsMultiLineTransaction.
+                                     - InvokeSearchItem - If the Transaction Type is not Bank Transfer then pop up the Mult Line Editor screen.
+                                     - BankImportGridTableViewEditing - Don't allow edit of Enterprise or Vat Code if Transaction type Pay/Receipt or Bank Transfer.
+                                                                      - Allow edit of Customer/Supplier field if Transaction Type is anything other than Bank Transfer.
+                                                                      - Allow edit of Quantity field if Transaction Type is Cashbook or Cash Sale/Purch.
+                                     - SetupWidthOfForm - Added 5 to the width of the columns to allow for the form to fill better.
+                         - MainUnit - imgTeamViewerClick - If Irish customer then show installed TeamViewer, if UK customer then show TGM TeamViewer URL.
+   20/10/20 /MK Bug Fix - Prompted_Validated_Saved_MTDCredentials - Result of MTDApi.ValidateCredentials() was being returned as reverse.
+
+[V4.5 R4.3] -
+   14/10/20 /MK Change - AccsUtils - Prompted_Validated_Saved_MTDCredentials - Added new function to prompt, validate and store MDT Credentials.
+                       - NewRepUnit - DigitalVatBtnClick - After the prompt for Username and Password, store this info so the prompt doesn't keep appearing.
+                       - Mainunit - actMTDVatExecute - After the prompt for Username and Password, store this info so the prompt doesn't keep appearing.
+                       - uSysMain - actMTDUsernameAndPasswordExecute - Changed prompt, validate and store of Username and Password to new AccsUtils function.
+   15/10/20 /MK Change - uLoginCredentials - Added DatabasePath to be passed into the Show function so the screen can show a stored Username and Password.
+                                           - Disable the Username and Password entry if there are LogInCredentials stored already.
+                                           - Added an Edit button so that if the Username and Password is disabled the user has the option to edit them.
+                       - uSysMain - Changed Kingswood support phone number and address - GL request.
+
+[V4.5 R4.2] -
+   06/10/20 /MK Bug Fix - uDigitalVatForm - RetrieveReceiptFromAPI - Removed check for Username and Password that should be entered in the System area.
+                        - Mainunit - actMTDVatExecute - MTD users need to enter in their Username and Password before submitting VAT Return.
+                        - NewRepUnit - DigitalVATBtnClick - MTD users need to enter in their Username and Password before submitting VAT Return.
+
+[V4.5 R4.1] -
+   30/09/20 /MK Change - uDigitalVATForm - SubmitReturn - If the user hasn't entered in the log in credentials into the System area then prompt the log in credentials - TGM request.
+                                         - RetrieveReceiptFromAPI - Changed the assignment of LoginCredentials to Submit Return button so only check that LoginCredentials <> nil.
+
+[V4.5 R4.0] -
+   29/09/20 /MK Additional Feature - New unit, uReviewFarmFinances, created to show reports after Bank Link files are imported.
+                                   - uBankImport - When transactions are saved pop up the new uReviewFarmFinances form.
+
+[V4.5 R3.9] -
+   29/09/20 /MK Change - AccsData - If the DefaultStatementDirectory is null or it doesn't exist then default to the Desktop/Downloads (whichever folder has CSV files).
+                       - AccsUtils - Add two new functions - GetUserDownloadsDir - Gets users Desktop/Downloads folder (whichever directory has CSV files).
+                                                           - GetUserDownloadsDir - Get the Downloads directory.
+                       - MainUnit - BankFileImportTimerTimer - If the user is not an accountant and their in ROI then, if CSV files don't
+                                                               exist in DefaultStatementDirectory then show new TfmBankLinkNoFileFound form.
+                       - uBankFileSelector - Added icons to the form for Settings, Ignore File, Import and Cancel - GL request.
+                                           - Added text to the top information area about Ignore File - GL request.
+                                           - Changed colour of top information area to clInfobk and the font colour to clNavy - GL request.
+                                           - Order the grid by Created Date - GL request.
+                                           - After changing the Grid Sort to Created Date in descending order I had to order the FBankFiles and FIgnoreList by name
+                                             using a MemData recordset so that when reading in the IgnoredFiles file the files won't appear again because of the
+                                             use of indexes of item in both the FBankFiles and FIgnoreList.
+                                           - If the user ignores all files then close the form and pop up uBankLinkNoFileFound.
+                       - uBankImport - Order the Source Bank drop-down-list by Name.
+                       - uBankLinkNoFileFound - Give the user the ability to jump to either Desktop or Downloads.
+                                              - Changed the Cancel button to Exit - GL request.
+
+[V4.5 R3.8] -
+   18/09/20 /MK Additional Feature - Created a new form, uBankLinkNoFileFound, which appears if no bank link files are found in DefaultStatementDirectory.
+                Change - AccsData - Created a public property to return the Farmgate serial no.
+                                  - UseThisAlias - If the DefaultStatementDirectory is null or it doesn't exist then default to the Desktop.
+                       - uBankFileSelector - If no files are found and running in SilentMode i.e. when program opens, show new uBankLinkNoFileFound if
+                                             the user is not an accountant and the country is Ireland - GL request.
+
+[V4.5 R3.7] -
+   14/09/20 /AB Bug Fix - Fixed the Enterprise Reports where the Number of Enterprises is used, value is divided by 100 - GL reported.
+
+[V4.5 R3.6] -
+   07/09/20 /AB Additional Feature - Added export of Trial balance, Full nominal audit, Age of debt, Bank audit trail and Transaction Report to CSV.
+                Bug Fix - uLedgerReport - Bug fix within statement report. Running a report between 2 dates with no transactions the
+                                          balances picked up is the current balance not the point in time balance
+
+[V4.5 R3.5] -
+   10/08/20 /AB Bug Fix - Cashbook - Added check & prompt to stop users from deleting lines when editing a transaction on the cashbook form (prompts when trying to save or also print an invoice).
+            /SP Change - Changes for the copying of the receipt code from HMRC back to Accounts package.
+
+[V4.5 R3.4] -
+   30/07/20 /MK Additional Feature - New unit, uRestoreToNewCompanyName, created to allow the accountant to specify a new company name when restoring data - George (TGM).
+                Change - uBankImport - FormCreate - OpenDialog - Changed DefaultExt and Filter to CSV files so customers can't select PDF files -
+                       - uDataBackup - Execute - Pass in the Farmgate.def file so that we can check if user has accountant farmgate file.
+                                     - FFarmgateSerialNo - New private varial to store farmgate serial passed in by Execute.
+                                     - RestoreFromServer - If user has accountant serial number between 100 and 999 and the config file is missing then give prompt to contact Kingswood.
+                                     - DownloadAccountantClients - Prompt user with new uRestoreToNewCompanyName to allow accountants to specify new name for downloaded company.
+                                                                 - If the user cancels the new uRestoreToNewCompanyName then cancel restore of data.
+                                                                 - If the new company name already exists prompt user with confirmation to overwrite this data.
+                                                                 - Removed FarmgateWrapper here as it was causing a Termination Message Security Error and then closing the program
+                                                                   without the user getting the MessageDlg below to inform that the company name is different.
+                       - Chkcomp - RunButtonClick - If the user has the Kac.config file and a serial number between 100 and 999 i.e. accountant, don't show "Data Path does not match" message.
+   31/07/20 /AB Bug Fix - Accsdata - Added DbiSaveChanges to AllocatedVATDB table AfterPost - possible fix for issues following user having lines go missing from AllocatedVATDB (Ch026)
+                                   - found a few other tables in AccsData missing the DbiSaveChanges & updated as well
+
+[V4.5 R3.3] -
+   28/07/20 - SP to do later.
+
+[V4.5 R3.2] -
+   28/07/20 /MK Bug Fix - ChkComp - DeleteServicesFolder - Only delete the services folder if its not figured - Catriona Hughes had an issue where the folder
+                                                           was being deleted when she opened the Farm accounts company.                                            
+
+[V4.5 R3.1] -
+   18/05/20 /AB Mod - uDigitalVATForm - ApplicationActivate - Set FReceiptCopied = True
+
+[V4.5 R3.0] -
+   18/05/20 /SP Mod - Retrieving HMRC VAT Receipt via REST service.
+   
+[V4.5 R2.1] -
+   25/05/20 /MK Additional Feature - AccsData - Added fields to AccsDefaults - UpdateNo, LastVerUpdate, LastBackup and MaintPromptDate.
+                                              - Added properties for these new fields.
+                                              - Added procedure CheckNewVersionAvailable which receives a message from KInstaller whether version is up-to-date.
+                                              - Added procedure CheckMaintenanceWithKinstaller which recieves a message from KInstaller where the serial number is on maintenance.
+                                   - MainUnit - FormClose - Added prompt for backup where backup date is more than 30 days ago.
+                                              - FormActivate - Added check for new version similar to what Kingswood Fields does.
+                                                             - Added check if customer is on maintenance.
+                                              - UpdateModules - Store new version number and date downloaded in AccsDefaults table.
+                                              - ChangesBeforeRegVerCheck - Store the version number in the AccsDefaults table.
+                                   - uDataBackup - Store the backup date in AccsDefaults if the backup was completed.
+   26/05/20 /MK Additional Feature - ChkComp - DeleteSyncFilesInKingsacc - Delete the sync files from the Kingsacc folder that were installed by KInstaller.
+                                             - DeleteServicesFolder - Delete the Services folder for customers without the Invoice module.
+                Bug Fix - MainUnit - FormCreate - Don't show sync button if not SyncConfigured.                             
+
+[V4.5 R2.0] -
+   18/05/20 /AB Change - TXWRITE - Fixed bug where Customer/Supplier was not being saved correclty for DD/DC/SO transaction from Bank Import (Updated TxWrite)
+                       - uDigitalVATForm - Added prompt to HMRC Return to force user to review Audit Trial Before Submitting Return. Request from GM as users were blindly submitting without checking.
+
+[V4.5 R1.9] -
+   13/03/20 /AB Bug Fix - Uyearend - Fixed bug where year end doesn't delete old carried forward files (e.g. SLFile-1)
+                                     so they could be overwritten with correct versions causing issues with some spanning reports - Ch021
+
+[V4.5 R1.8] -
+   06/03/20 /MK Bug Fix - Cashbook - ProformaPanel - Set the top to zero as it was appearing over delete option - John Joe Murphy.
+
+[V4.5 R1.7] -
+   21/02/20 /AB Bug Fix - uBankImport - Fixed bug in where nominal description field isn't clearing and appearing in next transaction for DD/DC/SO transactions
+   02/03/20 /MK Change - uBankImport - ImportTransactions - Don't default Vat to "Z" - George (TGM) request.
+                                     - FindAndPostNominal - Default Vat to selected Nominals associated VatCode - George (TGM) request.
+                                     - AssignNomDetailFromStore - If Stored Nominal has an associated VatCode then add vat code to the grid - George (TGM) request.
+            /AB Change - OthForm - disable the year end check box & stop users being able to do a year end within archive data.                         
+
+[V4.5 R1.6] -
+   23/12/19 /MK Change - uBankImport - WriteToTable - Allow for "java simpledateformat" value to be converted to date - Shane Chambers.
+                                     - Allow for the Debit/Credit indicator field that appears in the Bank of Ireland Business Banking file.
+                       - AccsData - UpdateBankCSVDefaultsTable - Added new fields for new components on uBankCSVConfig.
+
+[V4.5 R1.2] -
+   21/11/19 /MK Change - Version board had a misprint of V4.5R1.2 instead of V4.5R1.1 for version number.
+                         GL then sent out an email with V4.5R1.2 on so I put up a new version with this version number change. 
+
+[V4.5 R1.1] -
+   18/11/19 /MK Bug Fix - Cashbook - LoadJobCardClick - Don't exit if CustomerId is not -1 as it can come from the TfmJobCardCustomerListing.
+
+[V4.5 R1.0] -
+   11/11/19 /MK Bug Fix - AccsData - CreateBankImportNLMatch - Add fields to BankImportNLStore if it exists already.
+
+[V4.5 R0.9] -
+   06/11/19 /MK Bug Fix - MainUnit - MenuBarExecute - Only give prompt if Sale/Purchase Invoice preference is ticked and tab is SaleInvoice or Purchase Invoice and field in grid is filled - Milo Murphy.
+
+[V4.5 R0.8] -
+   25/10/19 /AB Change - TxWrite - Bug Fix when editing date on a Receipt / Payment the date on the discount line was not updated
+   25/10/19 /MK Bug Fix - uBankImport - AssignNomDetailFromStore - Don't try if AccsDataModule.BankCSVTempTableDB.FieldByName('Details').AsString is nothing.
+
+[V4.5 R0.7] -
+   30/09/19 /AB Change - updates to the NI VAT Audit Trials (standard & MTD) to include the exempt VAT codes & updated summary at bottom. VAT summary (9 Boxes) do not include the totals
+                         from exempt codes. Units modified uvatreps & DigitalVAT - Changes marked Ch014
+             SP Changes for HMRC regarding sending of user computer info.
+
+[V4.5 R0.6] -
+   23/09/19 /MK Change - uLedgerReport - EnterExtendedTxDetails, EnterExtendedTxDetailsLastYear -
+                                         If there is a LineDate on an invoice then show it under the LineDate column - Tom Doran / GL.
+                Bug Fix - Stat - FormActivate - Only show Extended Statement button if Prog is Statement.
+
+[V4.5 R0.5] -
+   20/09/19 /MK Change - uSimpleInvoiceBaseFrame - AcceptUserVatAmount - George (TGM) asked that we change this allowed amount from 0.01 to 0.025.
+                       - MainUnit - LoadTransaction - Only allow Sales and Purchase invoices to be viewed in new Grids - TGM request.
+                Additional Feature - MainUnit - Added TeamViewer icon to the bottom task bar on the transaction screen which opens TeamViewer depending on Cashbook country.
+                Bug Fix - uSimpleInvoiceBaseFrame - Summarize - Using HeaderIndex instead of line index for tvVATAmtIndex Value.
+
+[V4.5 R0.4] -
+   16/09/19 /MK Change - uBankImport - erTransactionTypesPropertiesChange - if TransactionType is "Payment / Receipt" then blank out stored nominal else assign stored nominal - Martina Flynn.
+                                     - BankImportGridTableViewEditing - Don't allow edit of Enterprise if TransactionType is "Payment / Receipt".
+                       - AccsData - New prcoedure, UpdateBankImportNLMatch, to add TxTypeDesc field to BankImportNLStore.
+                                  - New function, GetStoredBankLinkInfo, to get TStoredBankLinkInfo from BankImportNLStore.
+                                  - StoreNLAndDescription - Use GetStoredBankLinkInfo instead of GetNLNoForBankImportDesc.
+                                  - When using StoreNLAndDescription pass in TransactionType.
+                       - uSimplePurchaseInvoiceFrame, uSimpleSaleInvoiceFrame -
+                         - If "AutoComplete Comment and 1st Nominal" preference is ticked then auto file Nominal and comment if Supplier/Customer are selected
+                           and record found in the SLPLDefaults table - TGM request.
+                Additional Feature - uAccounts - New class, TStoredBankLinkInfo, created to get stored nominal and txtype from BankImportNLStore table.
+                                   - uBankImport - AssignNomDetailFromStore - New procedure created as the same code was being used 3 times in different subroutines.
+                Bug Fix - uSysMain - FormActivate - Only show "Auto Enterprise Selection" preference is Enterprise module exists.
+   17/09/19 /MK Change - SimpleAccsDataModule - If "Auto Fill Comment and First Nominal" preference is ticked then store record in SLPLDefaults table.
+                                              - If "Use Last Description as Comment" preference is ticked the set comment of invoice to last lines nominal descriptin if no comment.
+
+[V4.5 R0.3] -
+   27/08/19 /MK Bug Fix - uSimpleInvoiceBaseFrame - Call ResetGridView at end of actCreateInvoiceExecute so that next invoice no is created after save - TGM reported.
+                        - BankImport - SaveTransactions - As BankCSVDetailTempTableDB("NomName") always has the nominal name even if single line then use this instead of BankCSVTempTableDB("NomName")
+                Change - BankImport - BankImportGridTableViewFocusedItemChanged, BankImportGridTableViewFocusedRecordChanged -
+                                      Check if multiline transaction and don't allow edit of nominal, amount, enterprise or analysis code.
+                                    - InvokeMultiLineEditor - If user has entered nominal/ent info and then presses Multline button to add more lines, clear off nominal/ent of single line.
+                                    - StoreNominalSelection - Don't auto update nominal if this transaction is a mutliline.
+                       - uVATSubmissionReportForm - Added a ShowTheForm class procedure that creates and free's form instead of calling form doing it.
+                                                  - Added a new type, TViewType, that allows ShowTheForm to change Position of the form depending where it is being called from.
+                       - uDigitalVatForm - actReportsExecute - Call class procedure TVATSubmissionReportForm.ShowTheForm and pass in ViewType.
+                Additional Feature - NewRepUnit - Added submenu item to VatPopMenu for "View Submitted Forms" - TGM request.
+   28/08/19 /MK Additional Feature - uSimpleInvoiceBaseFrame - actCreateInvoiceExecute - Check for duplicate Cust/Supplier+Date+Reference/InvoiceNo before saving and give Yes/No prompt - TGM request.
+                Change - uSimpleInvoiceBaseFrame - ChangesPending - Was based on whether user had created an invoice by adding a full line instead of whether the user had entered something in a cell of the grid.
+                       - uVATSubmissionReportForm - Added ActionList with actRun and actExit actions.
+                                                  - actRun.Enabled if VatReportQuery.RecordCount > 0.
+                       - MainUnit - SetupInterface - MTD VAT and Year End page now visible for all UK Customers not just Simple Vat users.
+                Bug Fix - MainUnit - actSystemExecute - Don't allow open of System screen if data entered into Sale/Purch Invoice grids as Access Violation would appear because grids can be turned on/off in System.
+   30/08/19 /MK Additional Feature - uSimpleInvoiceBaseFrame - Added new column to grid for Line Description that is only available when the Allow Overwrite of Nominal Description preference is ticked - TGM request.
+                                   - SetupInterface - New reports tab can be available for Ledger NI only or Irish customers with either Simple Vat or Invoicer module.
+                Change - uSimpleInvoiceBaseFrame - Changed Comment column caption to Invoice Commment - TGM request.
+                                                 - Removed all code for the pop up of the Nominal Description Free Text - TGM request.
+                       - MenuUit - Changed caption of actOther to Year End/Other if no Vat Module or Year End/Vat if Vat Module.
+                                 - SetupInterface - Reports page only relevant to Irish users that don't have Simple Vat on.
+                       - Jour - Changed layout of the screen so that it can be made larger to view more lines - TGM request.
+                              - Remove the Next button as its no longer required - TGM request.
+                              - Change colour of panels to standard blue colour on main grid - TGM request.
+   02/09/19 /MK Change - NomRpt - Created public variable, MainGridVatSumChecked, that allows the defaulting of VatAuditChecked.Checked from outside forms.
+                                - FormActivate - Check MainGridVatSumChecked to set VatAuditChecked.Checked.
+                       - NewRepUnit - Set NominalReportForm.MainGridVatSumChecked = False as not required to be defaulted here.
+                       - MainUnit - If Ireland then in VAT/Year End show Summary Vat Report and Detailed Vat Report instead of MTD and Submissions - GL request.
+
+[V4.4 R1.0] -
+   23/07/19 /MK Additional Feature - uBankImport - WriteToTable - Assign Nominal/Enterprise to line if Detail text exists in BankImportNLStore.
+                            Change - uBankImport - ImportTransactions - No need to do a second loop through the grid to allocate stored nominals as stored
+                                                                        nominals are being assigned when transactions are imported from file.
+                                                 - StoreNominalSelection - If AAllocSelectToGrid then loop through grid and assign nominals to stored Details in BankImportNLStore - Gemma (Matt Ward).
+
+[V4.4 R0.9] -
+   04/06/19 /MK Bug Fix - ChkComp - Had to change the extract of the BDEUpdate files so that it would extract sub folders.
+
+[V4.4 R0.8] -
+   21/05/19 /MK Incorporated From Release - uLedgerReport - FilterLedgerTransactions - Fix for first line on second page appearing above the Header line - AB fix.
+
+[V4.4 R0.7] -
+   21/05/19 /MK Additional Feature - ChkComp - RunButtonClick - If MTD user then install BDEUpdate.zip that was downloaded by KInstaller.
+
+[V4.4 R0.6] -
+   07/05/19 /SP Incorporated Changes from Andrew (TGM) - DigitalVat - Rounding issued reported by Andrew TGM.
+
+[V4.4 R0.5] -
+   16/04/19 /MK Change - uKingsCC - GetSysDir - George (TGM) asked that we check for the Wasys32.dll file in the Kingsacc folder for users
+                                                who have the Accounts on a high security system that doesn't allow access to the Windows directory.
+
+[V4.4 R0.4] -
+   Changes between this version and V4.3 R4.5 are all changes for MTD made by SP and AB.
+
+[V4.3 R4.5] -
+   28/03/19 /MK Change - uBankLink - WriteToTable - HSBC bank use a ShortNameMonth e.g. JAN, FEB etc, as part of the date.
+                                                    Check to see if this exists and use function to derive date from it - Georgina Fort.
+                       - AccsUtils - Added new functions for MonthIsShortName and GetShortMonthNameDate.
+
+[V4.3 R4.4] -
+   06/03/19 /SP Bug Fix - New way to clear off files from FBankFiles that have been deleted by the user.
+                                      This would have caused an index error message.
+
+[V4.3 R4.3] -
+   09/02/19 /SP Incorporated Changes from Andrew (TGM) - uEntSetup - Don't allow delete of nominal if nominal used in Proforma.db.
+
+[V4.3 R4.2] -
+   23/01/19 /MK Bug Fix - uBankImport - Default height gbImportPanel has to include Browse for Folder section - TGM.
+
+[V4.3 R4.1] -
+  10/01/19 /MK Change - INIT - INITIALISE - If the database form Farmgate doesn't exist then look through other databases in the Kingsacc folder
+                                            then default the Farmdate database to the first database found i.e subforder containing Cashbook.def.
+  15/01/19 /MK Change - AccsData - CreateBankImportTempTable - Added new fields for new split transaction changes in Bank Link.
+                      - uBankImport - SetupScreen - Cashbook Income/Expenditure legend item should only appear if Ledger with Cashbook is enabled.
+                                    - ValidateTransactions - Moved Transaction Type check before the date check as this the order the columns take on the grid.
+                                                           - Moved Customer/Supplier check after Stub Number to match order of columns on grid.
+                                    - InvokeMultiLineEditor - Only allow edit of multiline in Ledgers if Transaction Type is not Pay/Rec.
+                                    - BankImportGridTableViewEditing - Don't allow the entry to the Nominal field if the Transaction Type is Pay/Rec.
+               Additional Feature - uBankImport - Allow the split of a transaction when the user right-clicks in the Cust/Supp cell.
+                                                - Splitting a transaction creates a new line in the database that the user must fill completely.
+                                                - George (TGM) asked for this change to allow multiple Cust/Suppliers be added for a lodgement that may include
+                                                  more than one cheque.
+               Bug Fix - actImportExecute - uSupplierDownload - If MyFile is open then close it before assigning it again - Monika reported.
+
+[V4.3 R4.0] -
+   04/01/19 /MK Additional Feature - AccsData - CreateBankImportTempTable - Added discount field to Bank Import Temp Table.
+                                   - uBankImport - Added new discount column to grid.
+                                                 - SetupScreen - Only show new discount column if Ledger system.
+                                                 - SetupWidthOfForm - Change width of the form if new discount column is hidden.
+                                                 - BankImportGridTableViewEditing - Only allow discount field to be edited if transaction type is Pay / Rec.
+                                                 - SaveTransactions - Added variables to store the discount for the payment / receipt.
+                                                                    - Take discount and save to payment / receipt.
+   08/01/19 /MK Change - NewListing - Added Balance, Age1, Age2 and Age3 fields for ledger customers - GL/TGM request.
+
+[V4.3 R3.0] -
+   11/12/18 /MK Change - SystemDefinition - Created Global class procedure that allows that allows the invoicer module to be switched on outside of this unit.
+                       - Types - Created a string array of serial numbers from customer interface that have the invoicer module.
+                       - MainUnit - ChangesBeforeRegVerCheck - If the invoice file exists then delete the file and assign the invoicer module if Cash.SerialNo is in new Types.SerialNosWithInvoicerMod string array.
+
+[V4.3 R2.9] -
+   20/11/18 /MK Bug Fix - uAccsNewFeatures - Defaults for left and right button were off - should be left is defaulted off and right is on.
+                        - MainUnit - RowOK - Don't allow a zero nominal code to be saved - Scott Mernagh.
+   20/11/18 /MK Change - uBankImport - WriteToTable - Default the Import boolean to false if date on bank file is outside financial year - Rory Crinion.
+                       - AccsData - CreateBankImportTempTable - New field, NomFreeText, added to store the "Overwrite of Nominal Description" value.
+                Additional Feature - uBankImport - Allow "Overwrite of Nominal Description" prompt to appear after selecting nominal and preference is on - Scott Mernagh.
+   23/11/18 /MK Additional Feature - uBankMultiLineTransEdit - Allow "Overwrite of Nominal Description" prompt to appear after selecting nominal and preference is on - Scott Mernagh.
+                Change - uBankImport - If the multi line has the NomName i.e used Free Text Nominal preference, then change DescString.
+                                     - LoadBankDefaults - OpenDialog.InitialDir should be the specified default location of bank link files from drop-down-menu.
+                       - BankAct - Changed Bank Statement Import button from RXButtong to CXButton to allow for drop-down-menu button type.
+                                 - Drop-down-menu allows Ledger users to specify the default location of bank link files for auto import.
+
+[V4.3 R2.8] -
+   19/11/18 /MK Bug Fix - uAccsNewFeatures - Defaults for left and right button were off - should be left is defaulted off and right is on.
+
+[V4.3 R2.7] -
+   15/11/18 /MK Additional Feature - AccsData - CreatePreferenceDefaults - New preferences to show new features screen for Bank Link, Co Op Link and Accountants Link.
+                                   - uPreferenceConsts - Added the New Features registry entries.
+                                   - MainUnit - FormActivate - Show the New Features screen.
+                                   - New unit, uAccsNewFeatures, created.
+
+[V4.3 R2.6] -
+   31/10/18 /MK Bug Fix - uLedgerReport - BuildStatementReport - TopLine1 should only show if the graphic is not showing because when the statement
+                                                                 is printed or saved as a PDF file, the statement header sits on top of the graphic - Tom Doran.
+                ** I saw that the letter head i.e. the graphic, is appearing on each page of the statement ( if more than one page ) GL says that this
+                   is normal for a letter head **
+   02/11/18 /MK Additional Feature - InvoiceReport - Added the Kingswood Accounts (C) Kingswood Computing footer to bottom of the invoice as is on all report - GL request.
+
+[V4.3 R2.5] -
+   18/10/18 /MK Additional Feature - MainUnit - ChangesBeforeRegVerCheck - Run the UpdatePLFigures and UpdateSLFigures procedures to fix any aging issues caused by a bug
+                                                                           in the V4.3 R1.4 version (fixed in V4.3 R1.5) so that aging is not replicated in each age field
+                                                                           in the Setup screen.
+   19/10/18 /MK Bug Fix - Cashbook - CheckForSingleEnterprise - Changed from SyncIsAvailable to SyncConfigured as everyone is getting the sync program but only
+                                                                those that have the JobCard would have the SyncConfigured.
+                Additional Feature - Setup - SaveEntAccountClick - If adding an income nominal to an enterprise and one-to-one association is enabled
+                                                                   then create a product of the same name as the nominal and link the two together.
+                Change - Setup - Grey out access to product drop-down in Enterprise and Nominal Setup screen if One-To-One association.
+                               - Nominal Accounts - moved Product under Nominal Type drop-down as it is in the Enterprise page.
+   25/10/18 /MK Change - Setup - If One-To-One association then if user edits the name of the nominal and there is a product assigned to this nominal,
+                                 then change the name of the product the name of the nominal - GL.
+                Additional Feature - New form, uEditAssocItem, allows user to edit a single item - currently used after adding products in one-to-one association.
+                                   - Setup - If One-To-One association then, after user saves a new enterprise income, pop up uEditAssocItem screen
+                                             that allows the user to add a price and unit for newly created product.
+   30/10/18 /MK Change - Types - Invoicer is now assigned by module not existence of Invoice file - GL request.
+                       - MainUnit - ChangesBeforeRegVerCheck - As the Types.Invoicer is now based on module then remove the invoice file from database to stop previous versions from working.
+
+[V4.3 R1.7] -
+   10/10/18 /MK Change - AccsData - CreateTransactionTable - Added CoOpImport and CoOpComment fields to this procedure.
+                       - PYend - CLEARTX - Removed CheckForNewFields from this procedure as there is no need for it as CreateTransactionTable already
+                                           creates the transaction table required for CLEARTX. CheckForNewFields was used to add additional fields that
+                                           were not included in CreateTransactionTable when all new fields in Transaction table should be added to
+                                           the CreateTransactionTable procedure table first.
+
+[V4.3 R1.6] -
+   09/10/18 /MK Change - Brought back the V4.3 R1.2 version as there is an issue in Year End with V4.3 R1.5 and V4.3 R1.4.                                                                                          Errors were appearing after Year End without these Open procedures.
+
+[V4.3 R1.5] -
+   21/09/18 /MK Incorporated Changes from Andrew (TGM) - CalculateMonths - Bug Report with Aging on statements - reported by Harvey Allen.
+
+[V4.3 R1.4] -
+   26/09/18 /MK Change - AccsData - Moved the getting/setting of modules and verno keys in the registry to public properties in AccsData.
+                                  - Added KRoutines as a use.
+                       - MainUnit - ChangesBeforeRegVerCheck - New procedure that allows checks and actions to be taken before the version in the registry is created/set.
+                                  - If the registry version number is less 4314 then turn the SyncInfo promo screen back on (depending on modules and App status).
+                                  - UpdateModules - Moved the getting/setting of modules and verno keys in the registry to public properties in AccsData.
+                       - uBankImport - ValidateTransactions - If transaction being saved is outside of current year the add year start to error message - Rory Crinion.
+                Additional Feature - AccsData - Created a public property to bring out the start month and year to a string.
+
+[V4.3 R1.3] -
+   21/09/18 /MK Incorporated Changes from Andrew (TGM) - CalculateMonths, ChkComp, RCSList, UAgeOfDebtReport -
+                                                         Changes to allow the user to run the Age Of Debt from a date and work out balances/aging from this date.
+
+[V4.3 R1.2] -
+   03/09/18 /MK Incorporated Changes from Andrew (TGM) - uNominalSetup - DeleteNominalAccount - Don't allow delete of nominal if it was used in job card or proforma.
+                                                       - uBankAuditTrailReport - BuildListingReport - Bug reported where if contra entry then report was looking
+                                                                                                      at supplier for Cash Income and customer for Cash Expenditure - Milo Murphy.
+   11/09/18 /MK Bug Fix - ChkComp - RunButtonClick - Run GatherCompanies again so that after Year End the archived year will show.
+                Change - ChkComp - GatherCompanies - If CheckCompanyName.ItemIndex then assign ItemIndex based on last selected company i.e. FSelectCompanyName.
+                                 - RunButtonClick - Assign FSelectedCompany as the selected company name before opening MainUnit.
+
+[V4.3 R1.1] -
+   31/07/18 /MK Incorporated Changes from Andrew (TGM) - Cashbook - BankAccountExit - Check validation for Bank Account number.
+
+[V4.3 R1.0] -
+   01/06/18 /MK Incorporated Changes from Andrew (TGM) - uLedgerReport - Changed PrinterSettings.FirstPage to 0 and PrinterSettings.LastPage to 0 as
+                                                                         these settings were causing the statement to only print 2 pages as the original
+                                                                         settings were PrinterSettings.FirstPage 1 and PrinterSettings.LastPage 2.
+
+[V4.3 R0.9] -
+   21/05/18 /MK Change - uYearEnd - Make the warning to take a backup on to a memory key more prominent - Monika/AB.
+   28/05/18 /MK Additional Feature - NewRepUnit - Created new drop-down-button for Bank Reports that has a drop-down-menu
+                                                  to allow the user to selected Bank Audit Trail or the new Bank Transaction Report.
+                Incorporated Changes from Andrew (TGM) - Changes for new Bank Transaction Report.
+
+[V4.2 R0.8] -
+   14/05/18 /MK Change - uSysMain - Changed the term Farm Sync to App Sync - more appropriate to contractors - GL request.
+
+[V4.3 R0.6] -
+   09/04/18 /MK Additional Feature - Types - TJobCardRecord - Allow for more than 30 chars to be brought in from JobCard App.
+                                   - uJobCardViewer - cxGridTableViewImportPropertiesButtonClick - Allow for more than 30 chars to be brought in from the JobCard App.
+                                   - Cashbook - AddJobToCard - If Detail Line 3 does not have data then do check for JobCardApp.Comment2 same as JobCardApp.Comment1.
+                Change - Cashbook - AddJobToCard - If Product Description Line 2 has data and JobCardApp.Comment1 has data then make Detail Line 3 JobCardApp.Comment1.
+
+[V4.3 R0.5] -
+   12/03/18 /MK Incorporated Changes from Andrew (TGM) - uVatReps, SystemDefinition - Changes for bug where the vat report shows for payments only even though Invoice Allocation is not ticked.
+
+[V4.3 R0.4] -
+   28/02/18 /MK Change - InvoicePrint - If Nominal is not showing but Line Date and Reference are then allow for longer detail - Donal Browne.
+
+[V4.3 R0.3] -
+   28/02/18 /MK Incorporated Changes from Andrew (TGM) - InvoicePrint, InvoiceReport and Cashbook changes for export to PDF problems.
+
+[V4.3 R0.2] -
+   22/01/18 /MK Additional Feature - AccsData - CreateBankImportNLMatch - Created a new table, BankImportNLStore, to store Bank Import Description with the Nominal selected by the user.
+                                              - StoreNLAndDescription - Store the nominal and descriptin in the BankImportNLStore table.
+                                                                      - If the user allocates a new nominal to the description then edit existing record and store it.
+                                              - GetNLNoForBankImportDesc - Function created to get nominal of the description.
+                                   - uBankImport - SaveTransactions - Store the Description and Nominal selected by user in new BankImportNLStore table.
+                                                 - ImportTransactions - When importing a file check if Description is in new BankImportNLStore table.
+                                                                      - If detail exists in BankImportNLStore table then set NominalAccount to stored value.
+
+[V4.3 R0.1] -
+   21/12/17 /MK Additional Feature - uSupplierDownload - Improved grid to look like the bank link with wider columns and line/column height increased.
+                                                       - Removed the old NomName lookup type field and added a NomName data type field.
+                                                       - Improved search option for Nominal which shows the ListBox screen like the Bank Link screen.
+                                                       - Allow user to type into Nominal field and it will popup list box with first letter typed, again, like Bank Link - DOM requests.
+[V4.2 R9.5] -
+   20/12/17 /SP Change - Add preference to only sync the Job Cards once per session - Kathryn in Dairy Direct.
+                       - Allowed the Job Reference to be imported from the App - Donal Browne.
+
+[V4.2 R9.4] -
+   05/12/17 /MK Bug Fix - DBCore - GETITEM - EntsFile - JobCardEnabled - Added try except here just in case field is null.
+
+[V4.2 R9.3] -
+   15/11/17 /MK Incorporated Changes from Andrew (TGM) - Cashbook - Don't show invoices with a zero amount - Jean - Lurganboy Farm Ltd.
+
+[V4.2 R9.2] -
+   13/11/17 /MK Additional Feature - AccsData - AddCoOpRecords - Added Centenary Co-Op - GL request.
+
+[V4.2 R9.1] -
+   02/11/17 /MK Additional Feature - AccsData - AddCoOpRecords - Added Arrabawn and Lisavaird Co-Ops - GL/DOM request.
+
+[V4.2 R9.0] -
+   02/11/17 /MK Bug Fix - MainUnit - FormClose - Only check for AgeOfDebtSyncRequired if SyncConfigured.
+
+[V4.2 R8.9] -
+   25/10/17 /MK Bug Fix - MainUnit - FormKeyDown - If pressing tab in last column program was trying to setfocus on btnAddAnotherLine but this button
+                                                   is not showing when editing a transaction. SetFocus on Save button if AddAnotherLine is not showing - Mary Parsons.
+                Change - AccsData - OpenAllFiles - Added new fields to the BankCSVDefaultsTable - Brendan Brady.
+                                  - CreateBankImportTempTable - Added two extra details fields in the BankCSVTempTable - Brendan Brady.
+                       - uBankCSVConfig - Added 2 extra details fields columns - Brendan Brady.
+                       - uBankImport - Added two new columns for Detail1 and Detail2 fields - Brendan Brady.
+                                     - Change width of form depending on what fields are showing.
+
+[V4.2 R8.8] -
+   19/10/17 /MK Incorporated Changes from Andrew (TGM) - AccsData - Removed fields from CustSuppListingDB field view as fields are added via CreateCustSuppListingTable procedure
+                                                       - PYEnd - Zeroise turnover figures for both cashbook and ledger systems.
+
+[V4.2 R8.7] -
+   29/09/17 /MK Incorporated Changes from Andrew (TGM) for nominal report not showing nominal group.
+
+[V4.2 R8.6] -
+   21/09/17 /MK Incorporated Changes from Andrew (TGM) for statement issues with future dates & overpayment/credit not invoice allocation.
+
+[V4.2 R8.5] -
+   14/08/17 /SP Cashbook Form - Prevent an invoice from loading if one is already loading
+   14/08/17 /SP BankLink import - Support to read Bank link files with ".out" extension
+   31/07/17 /SP BankLink import - check the transaction date is in the current financial year.
+   21/08/17 /MK Incorporated Changes from Andrew (TGM) for default to no for message when editing an allocated payment.
+
+[V4.2 R7.6] -
+
+   06/06/17 /MK Incorporated Changes from Andrew (TGM) for uBankAuditTrailReport.
+
+[V4.2 R7.5] -
+
+   18/05/17 /MK Incorporated Changes from Andrew (TGM) for reports to show new footer where the name of the program no longer showing.
+   23/05/17 /MK Incorporated Changes from Andrew (TGM) for Cashbook form bug reported by Edel Ryan to Monika.
+
+[V4.2 R7.4] -
+
+   09/05/17 /MK Incorporated Changes from Andrew (TGM) for Statement Header to show logo.
+
+[V4.2 R7.3] -
+
+   18/04/17 /AB Bug Fix - Setup - Incorporated change from Andrew for bug reported to him by Monika on 23/02/17.
+   21/04/17 /MK Incorporated Changes from Andrew (TGM) for uVatReps for UK farmers.
+
+[V4.2 R7.2] -
+
+   22/03/17 /MK Bug Fix - MainUnit - LoadTransactionGrid - cmboCustomer and cmboSupplier were given the same listing instead of seperate listings - reported by Tom Doran
+                                   - SearchGrid - Along with the fix where the cmboCustomers only contains Customers and cmboSuppliers only contains Suppliers
+                                                  this new set of code will assign the type of transactions that are associated to whatever cmbo is being searched on.
+   24/02/17 /MK Additional Feature - AccsData - New property MailboxExists to check to see if the Mailbox.config file exists in the database.
+                                   - Stat - Add email statement button which saves statement for selected accounts only - GL request.
+                                   - uLedgerReport - Moved all code the creates the report from RunStatementReport to BuildStatementReport so as
+                                                     the Stat unit can create the report to email it on to the clients.
+                                                   - New public form integer, FEmailCustSupp, that is assigned by Stat if emailing statement.
+   21/03/17 /MK Bug Fix - InvoicePrint - TotExcVATLabel1, TotalVATLabel1 and TotalIncVATLabel1.Enabled were not showing on invoice - Tom O'Keeffe reported.
+
+[V4.2 R7.1] -
+
+   22/02/17 /MK Change - ChkComp - Add new UseLineReference field.
+                       - AccsData - CreateInvoiceLayout - Add new UseLineReference field.
+                       - Calcs - CheckDataBaseFields - Default UseLineReference to whatever UseLineDate is set to.
+                       - InvoiceLayout - Add new UseLineReference field and tick box.
+                                       - Organise layout of tick boxes to the way the columns and footers are in the invoice.
+                       - InvoicePrint - SetColumnDefaults, SetColumns - Changes made to these procedures based on new layout changes - GL request.
+                       - InvoiceReport - Layout of report changed to allow for new layout changes - GL request.
+
+[V4.2 R6.2] -
+
+   09/02/17 /MK Bug Fix - InvoicePrint - Company Reg No on print out was overwriting Vat Number.
+                Change - InvoicePrint - Changed order of Email, Web, Company Reg No and Vat Number so they are in this order - GL request.
+
+[V4.2 R6.1] -
+
+   07/02/17 /AB Change - InvoicePrint - Moved Email Address below Web Address so longer Email Address will not overwrite Web Address.
+                       - Cashbook - Changes to allow for purchase nominal to be selected without an enterprise - Invalid Variant Type Conversion.
+                       - uYearEnd - Store log file at Year End to show date year end was done as well as last transaction before year end.
+                                    This will be useful to find if a customer entered transactions in previous year after year end.                                                                                                    
+
+[V4.2 R5.2] -
+
+   19/12/16 /MK Incorporated Changes from Andrew (TGM) for Invoice Summary running the nominal pointer fix automatically - reported by Michael Keohane.
+
+[V4.2 R5.1] -
+
+   13/12/16 /MK Additional Feature - UCustSuppSetUp - DeleteCustSuppAccount - Add extra check for customers to see if there are job card records.
+                           Change - Setup - Only allow delete of Nominals, Enterprises, Customers and Suppliers if not using App.
+   14/12/16 /MK Additional Feature - ChkComp - Added new image and new logo.
+                            Change - ChkComp - Removed network panel.
+                                             - Added new check for companies to be added to CheckCompanyName.
+                                             - Changed height of form if/if not using password.
+
+[V4.2 R4.5] -
+
+   02/12/16 /MK Bug Fix - Cashbook - If a blank enterprise existed the program would give an invalid type conversion error.
+
+[V4.2 R4.4] -
+
+   14/11/16 /MK Incorporated Changes from Andrew (TGM) for Single Enterprise and Product amount coming from associated nominal selection.
+                Bug Fix - uYearEnd - CheckFlags - Run button should only be enabled where the user ticks CheckBacked.
+                                   - RunButtonClick - CheckArchive should only be ran if user clicks on Run and ArchiveCheck is ticked.
+
+[V4.2 R4.3] -
+
+   24/10/16 /MK Incorporated Changes from Andrew (TGM) for Statement changes for Tom Doran.     
+
+[V4.2 R4.0] -
+
+   27/09/16 /SP Additional Feature - uAccsSync.pas support for syncing ExtendedStatement Report, work also done by Andrew (TGM)
+
+
+[V4.2 R3.7] -
+
+   16/09/16 /MK Additional Feature - New unit, uKingswoodAppInfo, that shows features of the Accounts App.
+                                   - MenuUnit - Show uKingswoodAppInfo if user is Ledgers with Vat..
+                                   - uPreferenceConsts - Added new const for ShowKingswoodAccsAppInfo.
+                                   - AccsData - Set new ShowKingswoodAccsAppInfo depending on whether user is Ledgers with Vat.
+                                              - AddCoOpRecords - Added new co-op, BarryRoe, that uses the Kerry file standard.
+                                              - Dairygold file spec is the same as Kerry - Michael Cloney (Dairygold) / GL.
+
+[V4.2 R3.6] -
+
+   24/08/16 /MK Bug Fix - ValidateTransactions - Because we default the Analysis to 0, if 0 is not found the transaction was not saved - Stephen Campion.
+
+[V4.2 R3.5] -
+
+   02/03/16 /MK Additional Feature - MainUnit - LoadTransactionGrid - Show Customer/Supplier info in grid if transaction is Co-Op Payment - James Walsh (7919)
+
+[V4.2 R3.4] -
+
+   15/06/16 /MK Bug Fix - AccsData - Removed all field defs within BankCSVTempTableDB component as these field defs were the old ones setup by AB.
+                                     These old field defs stopped the Bank Statememt Import screen from opening as fields in the grid were tied to
+                                     these old field defs.                                                                  
+
+[V4.2 R1.9] -
+
+   02/03/16 /MK Additional Feature - MainUnit - Incorporated Andrew's (TGM) changes to show the Co-Op comment column.
+                                   - ChkComp - CheckForNewFields - Incorporated Andrew's (TGM) changes to add new columns for CoOpImport.
+                                   - AccsData - AddCoOpRecords - Add two new co-ops (Drinagh and Bandon) that use the Kerry file standard.
+                                                               - Used an array to add these extra Co-Ops to the table.
+                                                               - Set the UseAsDefault button based on whether a default Co-Op was already selected.
+                                              - New property, DefaultCoOpCompany, to get the Default Co-Op company name.
+                                   - uSupplierDownload - Incorporated Andrew's (TGM) changes to update new fields in transactions table.
+                                   - uSysMain - Added new hint to "Allow Overwrite of Nominal Description" preference from GL text.
+                                              - Remember default hint delay time and set it to 10 seconds when the form activates
+                                                and set it back to the default time when the form closes.
+                   Change - uCoOpSelect - Stopped user from editing the Co-Op name field in this screen as it was not posting change to the database.
+                   Bug Fix - uSupplierDownload -  ReadFile - If wrong file i.e. file header contents does not match co-op selected then close MyFile and exit ReadFile procedure.
+
+[V4.2 R1.8] -
+
+   12/02/16 /MK Bug Fix - uTrialBalanceReport - Display Totals - This check for LineCount < 55 was only in ReportByAccount and not in ReportByGroup.
+                                                                 This caused blank lines to be added to the report table until a
+                                                                 "Table Is Full" error appeared - Irwin Rothwell reported.
+             AB Bug Fix - Stat - Incorporated source from Andrew to not show the "Show Euro Values" option in this report - GL/TOK reported bug. 
+[V4.2 R1.7] -
+
+
+  22/01/16 - SP - Modification -
+
+
+  MainUnit.pas - Restrict comment to 15 chars in the simple line entry (15 field length in database)
+
+
+[V4.2 R1.6] -
+
+  14/01/16 - SP - Modification - Mary Ryan (6951)/GL
+
+  uBankLink.pas - For this lady she wants the bank detail value to be stored in the comment field. To
+  achieve this we'll only use the detail as nom desc when the 'Allow Free Text Entry For Nominal Description' is
+  on, otherwise we should leave the nom description as nom heading and store the detail as comment.
+
+
+[V4.2 R1.5] -
+
+  04/12/15 /AB Bug Fix - TxWrite - Function CheckNomials updated to fix validation issues when doing 'To Sales' & 'To Purchases' Transactions
+  18/12/15 /MK Change - CalculateMonths - UpdateSLFigures, UpdatePLFigures - Passing in Integer Value instead of using RcsList.CustSuppListing.AgeByCombo.ItemIndex.
+                      - NewRepUnit - Try FreeAndNil then Create RcsList.CustSuppListing before form is opened in all instances.
+                      - uAgeOfDebtReport - ShowReport - Pass in index and caption from RcsList.CustSuppListing.AgeByCombo.
+
+[V4.2 R1.4] -
+
+  09/11/15 /MK Bug Fix - uLedgerReport - AccountName is null above was still allowing null customers in the database to go through
+                                         the below allocation of variables. Instead check length of AccountName variable
+                                         before allocation of variables.
+  23/11/15 /MK Additional Feature - Incorporated Andrew TGM source code for payment based vat as well as the changes to the Ledger Card.
+                                  - uSysMain - Added Andrew TGM changes to show Payment Based Vat Report &
+                                               whether VAT is on Sales, Purchases or Both.
+  23/11/15 /MK Additional Change - uSysMain - Do not show CurrencyBox ever - GL request.
+  
+[V4.2 R1.3] -
+
+  16/09/15 /MK Bug Fix - uEntSetUp - SaveEnterpriseAccount - When saving a brank new enterprise record in the EntFile table
+                                     the JobCardEnabled field was set to Null. An invalid variant type
+                                     conversion error would then appear. When the user closes out of the program
+                                     and re-opens it an Invalid Variant Type Conversion error appears again and no
+                                     data loads on the transaction grid - Mary Whyte reported.
+
+[V4.2 R1.2] -
+
+  17/08/2015 - SE - Bank Rec, Bank Transactions, Year End & CoOp Import -
+                    Added code to bring up HTM help.
+
+[V4.2 R1.1] -
+
+  30/07/2015 - SP - BugFix - TxWrite.pas -
+
+  *SP
+
+  Prevent the main grid reloading after each transaction write (during bank import)
+
+  30/07/2015 - SP - Modification - MainUnit.pas -
+
+  *James Walsh (7919)/GL/MK
+  Show the bank name on the main grid if the transaction type is 6 which is a Purchase payment.
+
+  30/07/2015 - SP - Bug Fix - NewListing.pas -
+
+  *Elizabeth McKean (6397)/MK
+  Problem observed when adding a new account using the NewListing unit, the
+  AccsDataModule.Accounts data needs to be refreshed to reflect any changes
+  to the accounts.
+
+  Refresh all accounts if record has been added. (AccsDataModule.Accounts.Refresh;)
+
+  29/07/2015 - SP - Modification - uBankImport.pas -
+
+  Prior to posting the banklink transaction, we are now checking if the description field
+  is empty and if so we are now defaulting the description to the nominal account name.
+
+  *Elizabeth McKean (6397) uncovered this problem where transactions were being saved with a blank
+  description and she couldn't identify what nominal account was specified
+  for the transaction when viewing from the main screen.
+
+  29/07/2015 - SP - Bug Fix - uSupplierDownload.pas -
+
+  For backwards compatibility we need to store the EntCode as
+  part of the purchase invoice transaction so that the cashbook screen
+  ent code column can be populated during editing.
+
+  *James Walsh (7919) reported this to MK/GL.
+
+
+
+[V4.2 R1.0] -
+
+  28/07/2015 - SP - Modification - uBankImport.pas -
+
+  During an import of an Ulster Bank file for Joe & Elizabeth McKean 6397
+  we came across a problem where the debit amount was actually prefixed
+  with a negative symbol. The program was expecting a positive amount.
+  To counteract this, we need to convert the negative amount to positive.
+
+[V4.2 R0.9] -
+
+  10/07/2015 - SP - New Feature - uBankImport.pas - Bank Import now supports resuming.
+                    New Feature - Mainunit - New Version facility.
+
+[V4.2 R0.6] -
+
+  22/06/2015 - SP - Bug Fix - CashBook.pas - Only invoke sync operation if the FarmSync program is available.
+
+[V4.2 R0.5] -
+
+  22/06/2015 - SP - New Feature - Handle Contra Transactions in Bank Import.
+                  - New Feature - Default of Nominal based on Customer/Supplier selection.
+
+[V4.2 R0.3] -
+
+  29/04/2015 - SP - Bug Fix - Remove UseDefaults requested by GL because defaulting Supplier/Customer should not be implemented
+                              for the simple entry system.
+
+               SP - Bug Fix   A problem became apparent when the grid column layout changed due to new preference options.
+                              If the cPref_AutoEntSelect is set to true the Enterprise column will appear after the Nominal column.
+                              If this happens we should not recall the default enterprise code as it will have been preset (where applicable)
+                              via the Nominal selection.
+
+[V4.1 R8.4/V4.2R0.2] -
+
+  29/04/2015 - SP - Bug Fix - Remove UseDefaults requested by GL because defaulting Supplier/Customer should not be implemented
+                              for the simple entry system.
+
+   23/01/15 /AB Change - Brought in various changes from Andrew in TGM for Qty fields.
+
+
+[V4.1 R8.0] -
+   23/01/15 /AB Change - Brought in various changes from Andrew in TGM for Qty fields.
+
+[V4.1 R7.9] -
+   15/01/15 /MK Change - AccsData - AddCoOpRecords - Whole layout for Dairygold now looks like a Glanbia file.
+                                                     Changed to allow import - John Coleman/GL request.
+
+[V4.1 R7.8] -
+   12/01/15 /MK Bug Fix - Incorporated AB's source code to fix bugs in Bank Audit Trail and Trial Balance Reports.
+                Additional Feature - Cashbook - Incorporatd AB's source code to add extra Qty fields for Ledger users.
+
+[V4.1 R7.7] -
+   19/12/14 /MK Bug Fix - Incorporated AB's source code to fix Termination Message in Bank Rec.
+
+[V4.1 R7.6] -
+   24/11/14 /MK Bug Fix - AccsData, MainUnit -
+                                      Check for SLPLDefaults in new uPrefences key not old key.
+                Change - MainUnit - btnCoOpImport/btnCoopImport3OnClick - Changed to bSuppDownloadClick.
+                                  - btnCoOpImport - Changed button kind from drop-down to standard.
+                                    Above changes made because payment button added to Co-Op screen to allow customers
+                                    with more than one supplier to enter payment - GL/Martin Murphy(7745) request.
+                Additional Feature - uSupplierDownload - Added payment button that allows users to record payment
+                                                         in this unit. Payment supplier is associated from the selected
+                                                         supplier in cmboSupplier.
+
+[V4.1 R7.5] -
+   21/08/14 /MK Bug Fix - uLedgerReport - RunStatementReport -
+                          Showheader only created if OutputRecord i.e. transactions exist for AccountNo.
+                          Otherwise the program gives an error that the Showheader field does not exist.
+
+                          More fixes to the Simple Entry Grid, vat wasn't calculated upon entering the amount
+                          or by changing the vat rate.
+
+[V4.1 R7.4] -
+   07/08/14 /MK Bug Fix - MainUnit - CheckVATForChanges - Only calculate VAT if CheckIt is True.
+
+[V4.1 R7.3] -
+   05/08/14 /MK Additional Feature - Added AB's new code for Cost Per Unit report change
+                                     to caption of label and new Enterprise Setup button/screen
+                                     from Cost Per Unit report.
+                Bug Fix - Check for blank enterprises.
+
+[V4.1 R7.2] -
+   23/06/14 /MK Additional Feature - Add AB's new code for Cost Per Unit flicker and QTY fixes.
+
+[V4.1 R7.1] -
+   15/05/14 /MK Bug Fix - Program was not saving the Payment Based Vat tick.
+            /SP Additional Feature - Add AB's new code for Cost Per Unit.
+
+[V4.1 R6.1] -
+  28/04/14 /MK Bug Fix - Cashbook - JobCardsClick, ProformaClic, QuoteClick - Hide Panel1 and then show Panel1 on Exit Task.
+                         Had to make this change myself as BP Agri found bug, requested code from Andrew(TGM) but no code sent
+                         as of yet. BP Agri only updated on Friday so bit of embarrasment when this bug was found hence
+                         the urgent fix. SP supervised.
+  01/05/14 /MK Change - Cashbook - Andrew (TGM) Cashbook.dfm loaded into code as order of Andrew's dfm differs from
+                                   our own dfm. Original Panel1.Hide or Panel1.Show code removed.
+
+[V4.1 R5.9] -
+  17/01/14 /AB Bug Fix - Trial Balance Report shows errors in totals when there isn't.
+[V4.1 R5.8] -
+  23/12/13 /MK Bug Fix - Fix for Dan Norton listing of Nominals not showing Liablities.
+
+[V4.1 R5.7] -
+  26/11/13 /MK Bug Fix - Bankact - Need to call OnActivate and OnShow before Data Integrity Runs.
+
+[V4.1 R5.6] -
+  11/11/13 /MK Additional Feature - Bankact - Add Data Integrity Check before Bank Rec opens.
+
+[V4.1 R5.5] -
+  01/11/13 /MK Additional Feature - AccData - New procedure AddBankLinkDefaults to add Bank Link default headings.
+                                            - Moved creation of Bank Link default headings from CreateBankCSVDefaultsTable to AddBankLinkDefaults.
+                                            - Added AIB Personal and AIB Business default headings for Bank Link.
+  05/11/13 [V5.2 R5.1] /MK Bug Fix - uAccounts - LoadIncome/LoadExpenseAccount -
+                                                 Increased range to allow Overheads, Current Assets, Fixed Assets and Liabilities
+                                                 like Andrew TGM's original code allowed.
+
+  // AB 03/09/2013 V4.1 R5.4
+                   - CashBook - Default BankRec to "U" for allocated invoices of payments.
+
+  // AB 13/08/2013 V4.1 R5.3
+  //
+  //               - CashFlow - Added Data Integrity Check before Profit and Loss report is ran.
+  //    26/08/2013 - BankRec - Bug Fix for not saving Bank Rec properly.
+
+  // SP 13/08/2013 V4.1 R5.2
+  //
+  //               /SP - Bug Fix : Default new transaction dates to the previous transaction date was broken.
+  //
+  //               /SP - Bug Fix : In Auto Ent Mode - the program was incorrectly positioning the NewListing Grid
+  //                               when the Enterprise layout e.g Dairy/Replacements/Cattle have been modified/deleted.
+
+  // AB 12/08/2013
+  //               V4.1 R5.1 - Various changes - LedgerCard Report Bug Fix.
+  //                                           - New Bank Audit Trail Report.
+
+  // SP 25/07/2013
+  //               V4.1 R5.1 - Main Screen - Changed the location of button which prints the Nom/Ent
+  //                                         listings from bottom to top of screen. - GL
+
+  // SP 18/06/2013-04/07/2013
+  //               V4.1 R5.0 - Include Ent code column in nominal code search listing.
+  //                           Additional Feature - Auto Select Ent Code based on Nominal Account selection.
+  //                           Additional Feature - Made printing of Nominal/Enterprise Accounts available
+  //                                                from bottom toolbar of Main Screen.
+
+  // MK 04/06/2013 V4.1 R5.0 - Change - Cashbook - Enabled IncludeLastYearCB.
+
+  // SP 13/05/2013 V4.1 R4.9 - Cost Per Unit Report - Unit Value was not formatted to 2 decimal places throwing report data.
+
+  // SP 10/05/2013 V4.1 R4.8 - Online Backup/Restore
+  //                           Accountant Link
+  //                           Extra Quantities ( 2 and 3) available through cashbook entry grid.
+  //                           Cost Per Unit Report - Prevent default Selection, take UnitName/Unit Total from Ent file.
+
+  // MK 16/04/2013 V4.1 R4.7 - Additional Feature - AccsData - Changed Kerry file settings.
+
+ 18/04/13 [V4.1 R4.7] /MK Bug Fix - UpperCase (FSeriesData[i].EnterpriseName) to match UpperCase(AEnterpriseName).
+ 17/04/13 [V4.1 R4.7] /MK Change - Changed ImportDefault Params of Kerry Co Op File.
+
+  // SP 13/03/2013 V4.1 R4.6' - Bug Fix - Access Violation when editing non simple transaction
+
+
+  // SP 27/01/2013 V4.1 R3.7 - Bug Fix - Edits to multi line transactions where not being saved for user.
+  //                                     Changes to values in first line were not propagated to the other
+  //                                     lines within the transaction. Editing of Transaction Date, Stub,
+  //                                     Supplier/Customer and Comment were fixed.
+
+  // AB Jan 2013 - V4.1 R4.6 - Attached is the updated bank rec module belonging to the version I sent last
+  //                           week for testing. I will modify the Trial Balance report form and move the new report
+  //                           code under the run button and remove the 'new report' button in due course and send
+  //                           that version down to you.
+
+  // AB Jan 2013 - V4.1 R4.6 - 1 - The new trial balance report quickreport unit
+  //                           2 - updated Nomrpt form to move new report code under the run buttom & remove the export
+  //                               button with the trial balance report as the export to csv option within the Quick Report
+  //                               is very good and needs minimal editing (removes the need to write for me to spend time
+  //                               writing a totally new export routine).
+
+
+  // SP 07/01/2013
+  // For reasons to do with withholding bank link from general release it was
+  // decided a jump in version from V4.1 R3.6 (old test ) to V4.1 R4.5
+  // (new test) was needed.
+
+  // V4.1 R3.6 becomes new Release (without bank link related functionality)
+  // V4.1 R4.5 becomes new Test (with all bank link related functionality)
+
+  // ----------------------------------------------------------------------------
+
+  // AB 14/12/2012 V4.1 R3.6 - Please find attached updated code & Forms (additional radio button added, radio button order changed etc).
+  //                           This update moves the Journal Option from within the Bank Activites form onto the Year End / Others
+  //                           Form (still calls existing interface on the Bank Activities Form) as per Gerrys request.
+  //                           I've tested it this end and all seems ok.
+
+  // SP 02/12/2012 - Bug Fix - From V4.1 R2.0 - V4.1 V2.4
+  //                           When transaction loaded from transaction grid into simple grid for editing,
+  //                           followed by a New Transaction, the details of the new transaction were saved to the
+  //                           previous edited transaction - resulting in the new transaction being completely lost and
+  //                           the previous transaction updated with incorrect details of new transaction. :O
+  //
+  //                 Bug Fix - Save/Cancel button incorrectly positioned when editing a simple multiline transaction.
+  //                 Bug Fix - Add Another Line & Remove Line hidden while editing simple transaction. It should not
+  //                           be possible to add or remove lines from any transactions.
+  //                 Mod       Display to user as a Notification when a transaction cannot be loaded into simple grid.
+
+
+  // SP 22/11/2012 - Mod - New Look 'n Feel for the Bank Import Screen
+  //               - Mod - Preference to allow user to edit Nominal Ledger accounts (
+  //                       Default false for Cashbook, True for Ledger systems.
+  //               - Bug Fix - Two heading labels on the Budget Report were incorrectly displaying Jan-[CurrentMonth]
+  //                           Now being correctly displayed as [StartFinancialMonth]-[CurrentMonth]
+
+  // AB 22/11/2012 - Bug Fix -
+  // I've had a look at the problem and got to the bottom of the issue very quickly.
+  // The breakdown report was missing the transaction types for cashbook transactions within it's filters (
+  // never been noticed before - obviously only ledger customers use it).
+  // Attached is the report unit code changed to include cashbook transaction - only 2 lines changed
+  // (income / expenditure filters - i've added TGM AB 20/11/12 to help highlight them).
+
+  // (I) Fixed bug where standing orders didn't save the Analysis Code
+  // (ii) Fixed bug where standing order can be saved & written with blank VAT code (now defaults to 'Z').
+
+
+  // SP 16/11/2012 - Mod - After complaint by George Megarry in TGM, the Main Screen transaction grid columns
+  //                       have been shorted + some columns have ApplyBestFix applied and header height has been increased
+  //                       to handle multi line header.
+  // TGM AB 16/11/2012 - 1 - Editing Payments / Receipts - fixes two bugs which could result in a
+  //                         transaction overwriting the next incorrectly while editing (detecting next
+  //                         line as a discount line incorrectly). This was a major problem and effected
+  //                         a number of customers and relates to the program adding in blank discount lines.
+  //                     2 - Cash Sale / Purchase - Fixed bug when editing to change the customer / supplier
+  //                         the balances of the new & old customer / supplier aren't updated and cause
+  //                         Data Integrity errors.
+
+  // 02/11/12 [V4.1 R3.1] / AB Bug Fix - Cost Per Unit Report Printout minor label fixes.
+
+  // 26/10/12 [V4.1 R3.0] / MK Bug Fix - AccsData - Delete of BankCSVDefaults - I wasn't closing the table before deleting it - caused error.  
+
+  // 24/10/12 [V4.1 R2.9] / SP Bug Fix - MainUnit.pas - Changed the Transaction Number sort to sort as number not string.
+  //                                     uBudget.pas - Incorrect Grid Heading Label displayed when 'Cost Per Unit" function turned on.
+
+  // 22/10/12 [V4.1 R2.8] / SP Bug fix - uBankCSVImport - In ledger system, the dropdownbox location was causing resize of form.
+  //                                     Using column PickList instead of combobox.
+
+  // 20/10/12 [V4.1 R2.7] /AB/SP Change - uBankCSVImport - Minor Fixes
+
+  // 21/09/12 [V4.1 R2.4] /AB Change - uBankCSVImport - Fixed Tick box problem and added Analysis Code option.
+
+  // 03/09/12 [V4.1 R2.4] /AB Change - uBankCSVImport - Allow customer to select Vat and Customer/Supplier.
+
+  // 13/08/12 [V4.1 R2.3] /AB Change - uBankCSVImport - Changed drop-down-box back to tick box.
+
+  // 13/08/12 [V4.1 R2.2] /AB Change - uBankCSVImport - Changed tick box to True/False drop down option.
+  //                                                  - Import ACC bank file - allow for " symbol before Credit, Debit and Balance Fields.
+
+  // 07/08/12 [V4.1 R2.1] /AB Change - uBankCSVImport - Created new Grid from table in database.
+  //                      /MK Bug Fix - uBankCSVImport - Liability Accounts drop-down was not showing Private Expenditure.
+  //                                  - AccsData - ImportDates fields for ImportYear, ImportMonth and ImportFrom were not being created.
+  //                                  - uSupplierDownload - Now reading file into StringList before reading contents of the file.
+
+  // 23/07/12 [V4.1 R2.0] /AB Additional Feature - Added Bank CSV Import.
+
+  // 05/06/12 [V4.1 R1.9] /AB Bug Fix - uPaymentVat - Fix For Null Transaction Descriptions Appearing As Prior Payment Descriptions.
+
+  // 21/05/12 [V4.1 R1.8] /AB Bug Fix - Fix For Payments Removing All Outstanding Invoices After Saving A Single Payment.
+  // 21/05/12 [V4.1 R1.8] /MK Change - uSysMain - Changed Made To Incorporate Andrews New Defintion Option For Invoice Allocation.  
+
+  // 31/04/12 [V4.1 R1.7] /SP Bug Fix - MainGrid Problem When Trying To Edit Cash Purchase Transactions On Invoice Allocation Version.
+
+  // 30/03/12 [V4.1 R1.6] /MK Bug Fix - ListBox Showing Blank.
+
+  // 06/03/12 [V4.1 R1.4] /AB Bug Fix - CalculateMonths - Changes For Fix in Aged Of Debt Recalculation.
+  // 06/03/12 [V4.1 R1.4] /MK Additional Feature - InvoicePrint - New Export To PDF Option.
+  // 06/03/12 [V4.1 R1.4] /MK Additional Feature - New Quick Report Panel In All Reports.
+
+  // 19/01/12 [V4.1 R1.3] / SP - Ensure the pie chart year select combo is drawn over the pie area of the screen (right side)
+
+  // 17/01/12 [V4.1 R1.2] /MK Change - CashBook - FormDeactivate - Old Dispose Pointers Code Not Setting TxHold/NomHold To Nil.
+  // 17/01/12 [V4.1 R1.2] /MK Change - MainUnit - TransactionEdit - If IsCashBookTrans Then Load Data To Grid. If Not Show Cashbook Or BankAct Form.
+
+  // 21/12/11 [V4.1 R1.1] - AccsData - GetSalesLedger/GetPurchaseLedger - Building TempRecords In Table Twice.
+
+  // 16/12/11 [V4.1 R0.8] / SP New - uReports screen, various minor tweaks including
+  //                                 Default budget comparision display to Neither
+  //                                 Ensuring contra value displaying correctly if user shifts focus away from transaction grid
+  //                                 Simple Entry - Focus to "Add New Line" button when user reachs the end of the transation grid
+  //                                 Bank Screen (Journal) - Double Click of acc code was not behaving the same as F2 press -
+  //                                 Both F2 and double click should invoke lookup screen.
+
+
+
+
+  // 16/11/11 [V4.1 R0.8] / SP New - uEnterpriseAnalysisByChart - Aka "Farm Summary / Business Summary" depending on modules :@.
+
+
+  // 07/11/11 [V4.1 R0.7] /MK Bug Fix - uSupplierDownload - Building Of Nomlisting Table Should Be Done Before qNominalLedger.Active.
+                                // 10/11/11 [V4.1 R0.7] /MK Bug Fix - AccsData - GetExpenseNominalLedgerAccs - Program Was Not Showing Private Expenditures For More Than One Partner.
+
+//  NewVerNo = 'KAW V4.1 R0.6'; // 02/11/11 [V4.1 R0.6] /MK Bug Fix - MainUnit - Not Showing TxType 9 Transactions.
+
+//  NewVerNo = 'KAW V4.1 R0.5'; // 20/10/11 [V4.1 R0.5] /SP Additional Main Screen UI Changes to improve UX
+                                // 20/10/11 [V4.1 R0.4] /MK Changes - Added Andrew Sourch For Editing Payment Based Vat Payments.
+
+//  NewVerNo = 'KAW V4.1 R0.3'; // 23/09/11 [V4.1 R0.3] /MK Additional Feature - uSupplierDownload - On FormCreate Check If Cash.Vat Is Checked Then cbVatRegistered.Checked.
+                                // 26/09/11 [V4.1 R0.3] /AB - Added Products Setup Option In Setup Screen.
+
+//  NewVerNo = 'KAW V4.1 R0.2'; // 12/09/11 [V4.1 R0.1] /MK Bug Fix - Cashbook - AllocateToInvoices - Added Check If AllocationTempDB Is Open - To Fix On Closed Dataset Error.
+                                // 12/09/11 [V4.1 R0.1] /MK Additional Feature - Added Andrews New Code For Vat Report New Vat Report Caption Change.
+
+//  NewVerNo = 'KAW V4.1 R0.1'; // SP 30/08/11 - Minor changes in UI - Nominal Account Filter drop down
+//                                             Show > Show Headings
+//                                             All Accounts > All Income/Expense
+//                                             Income Accounts > Income Only
+//                                             Expense Accounts > Expense Only
+
+//  NewVerNo = 'KAW V4.1 R0.0'; // SP 11/07/11 - Jump 4040 > 4100 inclusion of Inv Alloc in release.
+
+//  NewVerNo = 'KAW V4.0 R4.0'; // SP 11/07/11 - Bug in budget Actual Year to date figures disappeared from grid. Due to Misspelling of field name
+                                            // in the footer summary.
+//  NewVerNo = 'KAW V4.0 R3.9'; // SP 10/08/11 - Budget Reports new totals, Budget Grid Layout Optimzied for smaller screen col widths reduced.
+
+//  NewVerNo = 'KAW V4.0 R3.8'; // MK 01/07/11 - Andrew asked me to add a change to uSuppDownload and uSupplierDownload So It Doesn't Add Blank PlFile Entries.
+//  NewVerNo = 'KAW V4.0 R3.7'; // SP 17/06/11 - Budget screen size change. The screen wasn't going into maximize mode.
+//  NewVerNo = 'KAW V4.0 R3.6'; // MK 07/06/11 - Imported Andrews Changes.
+//  NewVerNo = 'KAW V4.0 R3.5'; // SP 23/05/2011 - More changes to financial Budget Report -
+                                // SP 03/05/2011 - Financial Budget Report -
+
+//  NewVerNo = 'KAW V4.0 R3.3';  // 12/04/11 [V4.0 R3.3] /MK Additional Feature - MainUnit - Added In Check For CheckNominals On Save of Cashbook Transaction.
+
+//  NewVerNo = 'KAW V4.0 R3.2'; // SP 20/03/2011 - Budget Report - Hide inactive nom accounts in report - inactive for selected period - e.g
+                                // if budget period is run for Jan to May , if a nom account has no figures for this period it will
+                                // be ignored and won't be output to report.
+                                // SP 20/03/2011 - Main Menu - Editing of Co-op Payment was being incorrectly edited in the simple layout grid.
+                                // Co-op payment should be edited using cashbook form.
+
+//  NewVerNo = 'KAW V4.0 R3.1'; // SP - Budget - Export to Html file. 28/02/2011.
+
+//  NewVerNo = 'KAW V4.0 R3.0'; // TGM Source Incorporated 24/01/11 -
+//  NewVerNo = 'KAW V4.0 R2.8'; // SP Change 17/01/11 - Budget, updated budget allowing for budget to start outside the calender year.
+                              // incorp. tgm source.
+
+//  NewVerNo = 'KAW V4.0 R2.7'; // SP Change 10/05/10 - Bug in Budget, the current month was not being set to the current financial month - was defaulting to current month using system datetime
+//  NewVerNo = 'KAW V4.0 R2.6'; // SP Change 10/05/10 - Bug in Budget, Actual Jan Figure was not carried forward into budget - figure was always 0.
+
+//  NewVerNo = 'KAW V4.0 R2.5'; // SP Change 09/05/10 - Bug in uSupplierDownload, supplier drop down was empty. Possible problem
+                              // with DevExpress control, to fix problem refresh the drop downs grid data on enter of control.
+
+
+//  NewVerNo = 'KAW V4.0 R2.4'; // SP Change 02/11/10 - Allow yearly totals in budget to be updated.
+                              // Andrew TGM new Enterprise Analyis This Year vs Last Year report.  
+
+//  NewVerNo = 'KAW V4.0 R2.3'; // SP Bug Fix 02/11/10 - Cashbook version with no Ent option - program would not tab/move from Stub Column.
+
+//  NewVerNo = 'KAW V4.0 R2.2'; // SP Change 02/11/10 - Extra check in SetupWizard which ensures wizard is only run if transactioncount is 0 as well as opening networth checks.
+
+  // MK Bug Fix 18/10/10 - Took out ShowMessage "TransNo3288" From MainUnit/LoadTransactionGrid.
+
+//  NewVerNo = 'KAW V4.0 R1.8'; // New Ledger Statement Card Unit.
+
+{  NewVerNo = 'KAW V4.0 R1.7'; // Mainunit, fixed bug where Z vatcode is selected, the VAT amount was calculated at over 5 million :)
+                              // Accessing the ZTaxAmt array using the wrong index.
+                              // Bug: ZTaxAmt[1,RecordIndex <<], Tempstr,'L');
+                              // Fix: ZTaxAmt[1,RecordIndex+1], Tempstr,'L');
+
+                              // Mainunit, Now defaulting VATAmount to 0 when Z tax code is selected.
+
+}
+
+31/07/2009  - SP
+
+ BUG - Re-introduced the reference field for Non VAT cashbook
+ CHANGE - Show bank Balance on Cashbook Entry (Main Screen)
+ CHANGE - Show Bank Name on Transaction Grid (Where Applicable)
+ CHANGE - Transaction Grid Column Layout / Column Captions (GL)
+
