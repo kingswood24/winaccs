@@ -6,6 +6,7 @@
                        - MainUnit - ShowBankLink - Only show TfmBankLinkNoFileFound if user hasn't ticked "Don't show this again".
                        - AccsData - CreatePreferenceDefaults - Default new ShowBankLinkFileNotFound pref to True so TfmBankLinkNoFileFound appears before user can press "Don't show this again".
                        - uPreferenceConsts - New const for ShowBankLinkFileNotFound.
+   27/11/20 /MK Change - uSupplierDownload - FindVat - Instead of a straight OK message that goes in a loop, give the user the option to ignore and move past this transaction - Milo Murphy.
 
 [V4.5 R4.5] -
    20/10/20 /MK Change - MainUnit, NewRepUnit - Changed the word log in credentials on the prompt that appears to Username and Password - TGM request.

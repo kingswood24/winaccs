@@ -18,7 +18,9 @@
                                                - Improved search option for Nominal which shows the ListBox screen like the Bank Link screen.
                                                - Allow user to type into Nominal field and it will popup list box with first letter typed, again, like Bank Link - DOM requests.
 
-   15/01/19 [V5.8 R4.1] /MK Bug Fix - actImportExecute - If MyFile is open then close it before assigning it again - Monika reported. 
+   15/01/19 [V4.3 R4.1] /MK Bug Fix - actImportExecute - If MyFile is open then close it before assigning it again - Monika reported.
+
+   27/11/20 [V4.5 R4.6] /MK Change - FindVat - Instead of a straight OK message that goes in a loop, give the user the option to ignore and move past this transaction - Milo Murphy.
 }
 
 unit uSupplierDownload;
@@ -371,6 +373,7 @@ var
 begin
    VatCodes.First;
    Result := False;
+
    if AccsDataModule.ImportDefaults['VATInclusive'] then
       VATInclusive := 'I'
    else
@@ -378,6 +381,7 @@ begin
 
    Result := ( (ThisRate > 0) and (Vatcodes.locate('TaxRate;IncExc',varArrayOf([ThisRate,VATInclusive]),[])) );
 
+   //   27/11/20 [V4.5 R4.6] /MK Change - Instead of a straight OK message that goes in a loop, give the user the option to ignore and move past this transaction.
    if ( not(Result) ) then
       if ( ThisRate > 0 ) then
          Result :=  ( MessageDlg('There is no matching VAT rate for ' + varToStr(ThisRate) + '%, VAT Type ' + VATInclusive +'.'+cCRLF+
