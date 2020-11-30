@@ -20,7 +20,7 @@ object fmRestoreToNewCompanyName: TfmRestoreToNewCompanyName
     Top = 50
     ParentFont = False
     Properties.CharCase = ecUpperCase
-    Properties.MaxLength = 5
+    Properties.MaxLength = 7
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
     Style.Font.Height = -16
@@ -38,7 +38,7 @@ object fmRestoreToNewCompanyName: TfmRestoreToNewCompanyName
     Left = 20
     Top = 16
     AutoSize = False
-    Caption = 'Restore Company Name as (Max 5 Chars)'
+    Caption = 'Restore Company Name as (Max 7 Chars)'
     Properties.Alignment.Vert = taVCenter
     Height = 24
     Width = 267
