@@ -1,3 +1,5 @@
+//   30/11/20 [V4.5 R4.6] /MK Change - Change char length of teNewCompanyName - TGM Request.
+
 unit uRestoreToNewCompanyName;
 
 interface
