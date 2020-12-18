@@ -1,3 +1,7 @@
+[V4.5 R4.7] -
+   16/12/20 /MK Additional Feature - MainUnit - Added the Bank Audit Trail to the reports page.
+                                              - Increased the height of the More Reports hyperlink so that it would stand out.
+
 [V4.5 R4.6] -
    13/11/20 /MK Change - MainUnit - FormActivate - Don't show BankLinkTimer anymore instead show BankLink select file screen and then show AppInfo and NewFeatures screen.
                                   - Bold the company name in the status bar - TGM request.    

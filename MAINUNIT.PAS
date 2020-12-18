@@ -77,6 +77,9 @@
                                    - Bold the company name in the status bar - TGM request.    
 
    26/11/20 [V4.5 R4.6] /MK Change - ShowBankLink - Only show TfmBankLinkNoFileFound if user hasn't ticked "Don't show this again".
+
+   16/12/20 [V4.5 R4.7] /MK Additional Feature - Added the Bank Audit Trail to the reports page.
+                                               - Increased the height of the More Reports hyperlink so that it would stand out.
 }
 
 unit Mainunit;
@@ -415,6 +418,39 @@ type
     pTeamViewer: TPanel;
     bccTeamViewer: TdxBarControlContainerItem;
     imgTeamViewer: TcxImage;
+    Bevel1: TBevel;
+    lBankAuditTrail: TcxLabel;
+    lBankAuditTrailDetail: TcxLabel;
+    cxButton1: TcxButton;
+    actBankAuditTrail: TAction;
+    Panel1: TPanel;
+    Bevel5: TBevel;
+    Bevel9: TBevel;
+    Bevel12: TBevel;
+    Bevel13: TBevel;
+    Bevel14: TBevel;
+    cxLabel19: TcxLabel;
+    cxButton13: TcxButton;
+    cxLabel20: TcxLabel;
+    cxLabel21: TcxLabel;
+    cxButton15: TcxButton;
+    cxLabel22: TcxLabel;
+    cxButton16: TcxButton;
+    cxLabel24: TcxLabel;
+    cxLabel26: TcxLabel;
+    cxButton18: TcxButton;
+    cxLabel29: TcxLabel;
+    cxLabel31: TcxLabel;
+    cxButton19: TcxButton;
+    cxLabel37: TcxLabel;
+    cxLabel38: TcxLabel;
+    cxButton20: TcxButton;
+    cxLabel40: TcxLabel;
+    cxLabel41: TcxLabel;
+    cxLabel42: TcxLabel;
+    cxLabel43: TcxLabel;
+    cxLabel44: TcxLabel;
+    cxButton21: TcxButton;
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -600,6 +636,7 @@ type
     procedure pmiCustomerAgeOfDebtClick(Sender: TObject);
     procedure pmiSupplierAgeOfDebtClick(Sender: TObject);
     procedure imgTeamViewerClick(Sender: TObject);
+    procedure actBankAuditTrailExecute(Sender: TObject);
   private
     function GetInputGridRecordCount: Integer;
     function GetIsEditingCashbookTransaction: Boolean;
@@ -7406,6 +7443,15 @@ begin
                      BankFileImportTimer.Enabled := True;
                end;
       end;
+end;
+
+procedure TFMainScreen.actBankAuditTrailExecute(Sender: TObject);
+begin
+   SetupReport(rpBankAuditTrail);
+   PROG := AnnBud;
+   NewRepForm.DataBase := NlFile;
+   NominalReportForm.SetNominalReportForm(BankAudit);
+   NominalReportForm.ShowModal;
 end;
 
 initialization
