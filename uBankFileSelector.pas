@@ -10,6 +10,10 @@
                                      using a MemData recordset so that when reading in the IgnoredFiles file the files won't appear again because of the
                                      use of indexes of item in both the FBankFiles and FIgnoreList.
                                    - If the user ignores all files then close the form and pop up uBankLinkNoFileFound.
+
+   11/01/21 [V4.5 R4.8] /MK Bug Fix - LoadBankFilesToGrid - Sort the MemData by CreationDate in Descending so that the grid starts in this order.
+                                                            If we don't do this sort here then when the user highlights a file and clicks import,
+                                                            the program switches to sort by name and the wrong file is imported.
 }
 
 unit uBankFileSelector;
@@ -21,7 +25,7 @@ uses
   cxContainer, cxEdit, cxLabel, cxGridCustomTableView, cxGridTableView,
   cxControls, cxGridCustomView, StdCtrls, cxButtons, cxClasses,
   cxGridLevel, cxGrid, ActnList, uAccounts, ExtCtrls, uAccsSystem,
-  dxmdaset, cxUtils, db, cxCustomData;
+  dxmdaset, cxUtils, db, cxCustomData, dbTables;
 
 type
   TBankFileType = (bfNone,
@@ -221,8 +225,11 @@ begin
          CreateMemDataFieldDef(MemData,'BankName',ftString,200);
          CreateMemDataFieldDef(MemData,'CreationDate',ftDateTime);
 
-         MemData.SortedField := 'FileName';
-         MemData.SortOptions := [soCaseInsensitive];
+         //   11/01/21 [V4.5 R4.8] /MK Bug Fix - Sort the MemData by CreationDate in Descending so that the grid starts in this order.
+         //                                      If we don't do this sort here then when the user highlights a file and clicks import,
+         //                                      the program switches to sort by name and the wrong file is imported.
+         MemData.SortedField := 'CreationDate';
+         MemData.SortOptions := [soDesc];
 
          MemData.Open;
          MemData.First;
