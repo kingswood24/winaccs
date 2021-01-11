@@ -80,6 +80,8 @@ object fmBankFileSelector: TfmBankFileSelector
         HeaderAlignmentVert = vaCenter
         Options.Editing = False
         Options.Focusing = False
+        SortIndex = 0
+        SortOrder = soDescending
         Width = 125
       end
     end
