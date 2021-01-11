@@ -1,3 +1,6 @@
+[V4.5 R4.8] -
+   11/01/21 /MK Bug Fix - uBankImport - SaveTransactions - Check to see if the BankCSVDetailTempTableDB.NomName field has a value, if not then use BankCSVTempTableDB.NomName.
+
 [V4.5 R4.7] -
    16/12/20 /MK Additional Feature - MainUnit - Added the Bank Audit Trail to the reports page.
                                               - Increased the height of the More Reports hyperlink so that it would stand out.
