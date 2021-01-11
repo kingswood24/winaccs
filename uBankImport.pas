@@ -88,6 +88,8 @@
                                                                     - Allow edit of Customer/Supplier field if Transaction Type is anything other than Bank Transfer.
                                                                     - Allow edit of Quantity field if Transaction Type is Cashbook or Cash Sale/Purch.
                                    - SetupWidthOfForm - Added 5 to the width of the columns to allow for the form to fill better.
+
+   11/01/21 [V4.5 R4.8] /MK Bug Fix - SaveTransactions - Check to see if the BankCSVDetailTempTableDB.NomName field has a value, if not then use BankCSVTempTableDB.NomName.
 }
 
 unit uBankImport;
@@ -1022,7 +1024,11 @@ begin
               else
                  begin
                     //   27/08/19 [V4.5 R0.3] /MK Bug Fix - As BankCSVDetailTempTableDB("NomName") always has the nominal name even if single line then use this instead of BankCSVTempTableDB("NomName")
-                    DescString := Trim(AccsDatamodule.BankCSVDetailTempTableDB.FieldByName('NomName').AsString);
+                    //   11/01/21 [V4.5 R4.8] /MK Bug Fix - Check to see if the BankCSVDetailTempTableDB.NomName field has a value, if not then use BankCSVTempTableDB.NomName.
+                    if ( Length(AccsDataModule.BankCSVDetailTempTableDB.FieldByName('NomName').AsString) > 0 ) then
+                       DescString := Trim(AccsDataModule.BankCSVDetailTempTableDB.FieldByName('NomName').AsString)
+                    else
+                       DescString := Trim(AccsDatamodule.BankCSVTempTableDB.FieldByName('NomName').AsString);
                     CommentString := Trim(AccsDatamodule.BankCSVTempTableDB.FieldByName('Details').AsString);
                  end;
 
