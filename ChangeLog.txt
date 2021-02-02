@@ -1,3 +1,6 @@
+[V4.5 R4.9] -
+   19/01/21 /AB Additional Feature - FullAudit - If journals were entered show them on the new detailed audit.
+
 [V4.5 R4.8] -
    11/01/21 /MK Bug Fix - uBankImport - SaveTransactions - Check to see if the BankCSVDetailTempTableDB.NomName field has a value, if not then use BankCSVTempTableDB.NomName.
    11/01/21 /MK Bug Fix - uBankFileSelector - LoadBankFilesToGrid - Sort the MemData by CreationDate in Descending so that the grid starts in this order.

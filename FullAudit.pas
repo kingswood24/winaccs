@@ -1,5 +1,11 @@
 {
+
+   04/12/20 - Ch022 - Added new global variable SuppressPrompts to stop all the promotps appearing during reset points / data fix routines so they don't appear during point in time year end
+                    - Added nre global variable DataIntegrityFail to record result and allow other units to read
+
    04/03/11 - Fix For Tom O'Keeffe Bug On CostPerUnitReport
+
+   19/01/21 [V4.5 R4.9] /AB Additional Feature - FullAudit - If journals were entered show them on the new detailed audit.
 }
 
 unit FullAudit;
@@ -132,6 +138,8 @@ type
   public
 
     { Public declarations }
+    SuppressPrompts : boolean;  //Ch022
+    DataIntegrityFail : boolean;  //Cho22
   end;
 
 {var
@@ -1080,6 +1088,8 @@ begin
      ReSetSales.Checked := False;
      ReSetPurchase.Checked := False;
 
+     DataIntegrityFail := False; //Ch022
+
      PassMask.Text := '';
      ConfirmBtn.Enabled := True;
      bExit.Enabled := True;
@@ -1329,7 +1339,7 @@ begin
                If CheckAllParameters ( FromNom, ToNom, FromSales, ToSales, FromPurchase,
                                        ToPurchase, LowTx, LowDt ) Then
                  begin
-                    If Messagedlg('You are about to Reset Pointer.', mtInformation,[mbYes,mbNo,mbCancel],0) = mrYes then
+                    If (SuppressPrompts) or (Messagedlg('You are about to Reset Pointer.', mtInformation,[mbYes,mbNo,mbCancel],0) = mrYes) then                //Ch022
                        begin
                           ProgressLabel.Show;
                           bExit.Enabled := False;
@@ -1349,7 +1359,7 @@ begin
                           ProgressLabel.Hide;
                           ProgressBar.Hide;
                           PassMask.Text := '';
-                          Messagedlg('Resetting Process Completed.', mtInformation,[mbOK],0);
+                          if not SuppressPrompts then Messagedlg('Resetting Process Completed.', mtInformation,[mbOK],0);    //Ch022
                           Close;
                           // TGM AB fixes problem with check box not being reset to 'Don't Reset .....'
                           Resetfirstgroup.ItemIndex:=0;
@@ -1575,7 +1585,7 @@ begin
                end;
            end;
        end;
-       showmessage('Sales Ledgers Corrected - Please Rerun Data Integrity Check');
+       if not SuppressPrompts then showmessage('Sales Ledgers Corrected - Please Rerun Data Integrity Check');     //Ch022
 
      End Else
             Begin
@@ -1626,7 +1636,7 @@ begin
                                    end;
 
          If DataProblem = true then begin
-           Showmessage('Data Integrity Test indicates a problem with your data. A detail log of problems and fixes done will now be displayed. Please Contact Kingswood For Help');
+           if not SuppressPrompts then Showmessage('Data Integrity Test indicates a problem with your data. A detail log of problems and fixes done will now be displayed. Please Contact Kingswood For Help');      // Ch022
            WriteLn(Logfile,' ');
            WriteLn(Logfile,'Data Integrity Test Indicates a problem with your data.');
            WriteLn(Logfile,'');
@@ -1634,18 +1644,20 @@ begin
            closefile(logfile);
             dirstring := RFarmGate.PLocation[2];
             progpath := ExtractFilePath( ParamStr(0));
-            try //winexec(PChar(progpath + 'wordpad.exe ' + progpath +  dirstring +'\datalog.txt'),sw_show);
-                // SP 12/01/11 - Load log file from log file path.
-                TNotepadForm.LoadFile(FLogFilePath);
-            except
-               on E : Exception do
-                  begin
-                     MessageDlg(E.Message,mtError,[mbOK],0);
-                  end;
-            end;
+           if not SuppressPrompts then begin                 //Ch022
+                try //winexec(PChar(progpath + 'wordpad.exe ' + progpath +  dirstring +'\datalog.txt'),sw_show);
+                        // SP 12/01/11 - Load log file from log file path.
+                        TNotepadForm.LoadFile(FLogFilePath);
+                except
+                    on E : Exception do
+                        begin
+                                MessageDlg(E.Message,mtError,[mbOK],0);
+                        end;
+                end;
+           end;     //Ch022
            end
        Else begin
-            Showmessage('Data Integrity Test Has Found No Errors With Your Data');
+            if not SuppressPrompts then Showmessage('Data Integrity Test Has Found No Errors With Your Data');     //Ch022
             WriteLn(Logfile,' ');
             WriteLn(Logfile,'Data Integrity Test Indicates No Problems With Your Data.');
             WriteLn(Logfile,'');
@@ -1657,6 +1669,9 @@ begin
        //         except
        //     end;
             end;
+
+       DataIntegrityFail := DataProblem;      //Ch022
+
 end;
 
 procedure TAuditFiles.PurchasebtnClick(Sender: TObject);
@@ -1826,7 +1841,7 @@ begin
                  ShowMessage(e.Message);
            end;
 
-       showmessage('Purchase Ledgers Corrected - Please Rerun Data Integrity Check');
+       if not SuppressPrompts then showmessage('Purchase Ledgers Corrected - Please Rerun Data Integrity Check');     //Ch022
 
      End Else
             Begin
@@ -1853,8 +1868,15 @@ begin
     If (((PassMask.Text = 'CONFIG') Or (PassMask.Text = 'config')) And
           (PassMask.Text <> '' )) Then begin
 
-     messagedlg('This auto fix is using Balance-ST as it''s start value.' +#10#13 +  'If no month end reset pointer operations done, Balance-St should be the same as St-Year.' +#10#13 +  'If they''re not the same, they must be manually fixed, otherwise this auto fix will make things worse. ' + #10#13 + #10#13 +  'Note, month end pointer reset is not an option in Winaccs, only DOS accs, so Balance-ST and St-Year should be the same in all winaccs systems and in DOS systems where end month ''reset nominal pointers'' was not run.',mtConfirmation,[mbOk],0);
-   if messageDlg('Use this option with EXTREME CAUTION.  Make sure you have backed up the accounts data before proceeding.  Manually check trial balance totals against Nominal audit running balances after running.  Are you sure you wish to continue?',mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+
+   if not SuppressPrompts then messagedlg('This auto fix is using Balance-ST as it''s start value.' +#10#13 +  'If no month end reset pointer operations done, Balance-St should be the same as St-Year.' +#10#13 +  'If they''re not the same, they must be manually fixed, otherwise this auto fix will make things worse. ' + #10#13 + #10#13 +  'Note, month end pointer reset is not an option in Winaccs, only DOS accs, so Balance-ST and St-Year should be the same in all winaccs systems and in DOS systems where end month ''reset nominal pointers'' was not run.',mtConfirmation,[mbOk],0);   //Ch022
+
+   if not SuppressPrompts then begin                                                                                                                                                                                                                                                                                                 //Ch022
+        if messageDlg('Use this option with EXTREME CAUTION.  Make sure you have backed up the accounts data before proceeding.  Manually check trial balance totals against Nominal audit running balances after running.  Are you sure you wish to continue?',mtConfirmation, [mbYes, mbNo], 0) <> mrYes then begin                //Ch022
+                showmessage('Fix Nominals cancelled');                                                                                                                                                                                                                                                                               //Ch022
+                exit;                                                                                                                                                                                                                                                                                                                //Ch022
+        end;                                                                                                                                                                                                                                                                                                                         //Ch022
+   end;                                                                                                                                                                                                                                                                                                                              //Ch022
 
 
 (*   InputString:= InputBox('Select maximum amount for fixing nominals', '(£/€) - must be a whole number!', '');
@@ -1942,10 +1964,10 @@ begin
                REWRITEREC(NlFile,RECNO);
            end;
        end;
-       showmessage('Nominal Accounts Corrected - Please Rerun Data Integrity Check');
-       end // end of messagedlg 'are you sure you wish to continue
+       if not SuppressPrompts then showmessage('Nominal Accounts Corrected - Please Rerun Data Integrity Check');       //Ch022
+    //   end // end of messagedlg 'are you sure you wish to continue                                                      //Ch022
 
-       else showmessage('Fix Nominals cancelled');
+    //   else showmessage('Fix Nominals cancelled');                                                                    //Ch022
 
      End Else
             Begin
@@ -2904,6 +2926,13 @@ begin
                   writeln(logfile,'Transaction Line ' + vartostr(AccsData.AccsDataModule.TransactionsDB['TxNo']) + ' appears invalid');
         end;
 
+    // TGM AB 15/01/21 added next 2 lines to check for journals to debtors / creditors control
+
+    if ((AccsData.AccsDataModule.TransactionsDB['DebitAC'] = cash1.XNOMDEBTOR) or (AccsData.AccsDataModule.TransactionsDB['CreditAC'] = cash1.XNOMDEBTOR)) then writeln(logfile,'Transaction Line ' + vartostr(AccsData.AccsDataModule.TransactionsDB['TxNo']) + ' is a journal against Debtors Control - ' + vartostr(cash1.XNOMDEBTOR));
+
+    if ((AccsData.AccsDataModule.TransactionsDB['DebitAC'] = cash1.XNOMCREDIT) or (AccsData.AccsDataModule.TransactionsDB['CreditAC'] = cash1.XNOMCREDIT)) then writeln(logfile,'Transaction Line ' + vartostr(AccsData.AccsDataModule.TransactionsDB['TxNo']) + ' is a journal against Creditors Control - ' + vartostr(cash1.XNOMCREDIT));
+
+    // End TGM AB 15/01/21
 
 end;
 
