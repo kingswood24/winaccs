@@ -84,6 +84,11 @@ Ch028 - Transaction Listing Report Issues - Bug : Reference not always being sho
 
 Ch029 - Bug fix within statement report. Running a report between 2 dates with no transactions the balance picked up is the current balance not the point in time balance
 
+Ch030 - Enterprise Reports bug where enterprise units is used & selecting a single code the unit value was devided by 100
+
+15/01/21 - added check for journals to debtors / creditors control as part of extended Data Integrity Check
+
+Ch031 - Bug fix : fix bug when in Invoice Layouts, click Change, click the X to close the screen, go back into Invoice Layouts, db is still in edit mode. Now cancels the editing on exit.
 *)
 
 interface

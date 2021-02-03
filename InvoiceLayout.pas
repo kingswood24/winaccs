@@ -149,6 +149,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormClick(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -412,5 +413,15 @@ begin
        if OpenDialog1.Execute then
         DBEdit17.Field.Value := OpenDialog1.FileName;
 end;
+
+// Ch031 start
+
+procedure TInvoiceLayoutForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+        if Panel5.enabled = true then ToolButton20Click(self);
+end;
+
+// Ch031 end
 
 end.
