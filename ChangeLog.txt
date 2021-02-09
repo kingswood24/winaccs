@@ -1,6 +1,7 @@
 [V4.5 R4.9] -
    19/01/21 /AB Additional Feature - FullAudit - If journals were entered show them on the new detailed audit.
    03/02/21 /AB Bug Fix- InvoiceLayout - When in Invoice Layouts, click Change, click the X to close the screen, go back into Invoice Layouts, db is still in edit mode. Now cancels the editing on exit.
+   09/02/21 /SP Changes - Changes to improve MTD Vat Submissions.
 
 [V4.5 R4.8] -
    11/01/21 /MK Bug Fix - uBankImport - SaveTransactions - Check to see if the BankCSVDetailTempTableDB.NomName field has a value, if not then use BankCSVTempTableDB.NomName.
