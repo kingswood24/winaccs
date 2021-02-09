@@ -66,7 +66,7 @@ var
 
 implementation
 uses
-   AccsConsts, AccsData, Mainunit, Params, DbGen, Types, Filed, Init,
+   AccsData, Mainunit, Params, DbGen, Types, Filed, Init,
    AbortPrg;
 
 {$R *.DFM}

@@ -90,7 +90,7 @@ uses
   uBudgetTypes, AccsUtils, uAccsSettings, uQuantityInput, MSXML2_TLB,
   ComObj, ShellAPI, Types, HHPack, igHHInt, LMDWebHTTPGet, LMDDownload,
   LMDWebConfig, LMDWebDownloadFormUnit, uSysMain, IniFiles, KRoutines,
-  ProgramUpdateThread, ProgramMaintenanceCheckThread;
+  ProgramUpdateThread, ProgramMaintenanceCheckThread, uMTDApi;
 
 type
   ErrorMsg = class(Exception);
@@ -100,6 +100,8 @@ type
      Period: string;
      IsPending: boolean;
   end;
+
+  TMTDReconcileResult = (crLoginCredentialMissing, crInvalidLoginCredentials, srUnavailable, srReturnChanged, srNotOnFile, srDuplicateOnFile, srNotSubmitted, srReconcileFailed, srReconciled);
 
   TAccsDataModule = class(TDataModule)
     PrintFile: TTable;
@@ -747,6 +749,12 @@ type
 
     procedure CheckMaintenanceWithKinstaller;
 
+    function ReconcileLastMTDSubmission(
+       const APeriodStart, APeriodEnd: TDateTime; const AVATReturn: TMTDVATReturn) : TMTDReconcileResult;
+
+    function MTDVATSubmissionReceiptPending(
+       const APeriodStart, APeriodEnd: TDateTime): Boolean;
+
     property DefaultEntCode : string read FDefaultEntCode write FDefaultEntCode;
     property LastImportBank : string read GetLastImportBank write SetLastImportBank;
     property DefaultStatementDirectory : string read GetDefaultStatementDirectory write SetDefaultStatementDirectory;
@@ -798,7 +806,8 @@ uses
     ubudgets, uallocatebudgets, registry, dataexport, uPreferences,
     uPreferenceConsts,
     TxWrite, uAccsSystem, Global, uTransactionQuantityInput,
-    uFarmSyncSettings, Chkcomp, uMailboxHelper, uAccsMessages;
+    uFarmSyncSettings, Chkcomp, uMailboxHelper, uAccsMessages,
+    CredentialsStore, LoginCredentials;
 
 
 {$R *.DFM}
@@ -8587,6 +8596,196 @@ end;
 function TAccsDataModule.GetFarmgateSerialNo: Integer;
 begin
    Result := PSysLongToDelphi ( RFarmGate.PSerial );
+end;
+
+function TAccsDataModule.ReconcileLastMTDSubmission(
+  const APeriodStart, APeriodEnd: TDateTime; const AVATReturn: TMTDVATReturn) : TMTDReconcileResult;
+var
+   Api: TMTDApi;
+   Credentials: TLoginCredentials;
+   Receipts: TMTDVATReceipts;
+   Receipt: TMTDVATReceipt;
+   i : Integer;
+   VatReturnChanged: Boolean;
+
+   PeriodStart: TDateTime;
+   PeriodEnd: TDateTime;
+
+begin
+  Receipt := nil;
+  SetLength(Receipts, 0);
+  VatReturnChanged := False;
+  VATReturnDB.close();
+   try
+      //Credentials := TLoginCredentials.create('254312584','s6f6a6n3');
+      Credentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath);
+      if ( Credentials = nil ) then
+         begin
+            Result := crLoginCredentialMissing;
+            Exit;
+         end;
+
+      try
+         Api := TMTDApi.create(Credentials);
+         Receipts := Api.GetReceipts();
+      finally
+         FreeAndNil(Api);
+         FreeAndNil(Credentials);
+      end;
+
+      if (Receipts = nil) or (Length(Receipts) = 0) then
+         begin
+            Result := srUnavailable;
+            Exit;
+         end;
+
+      // Get a match on receipts by comparing the periodStart & periodEnd
+      for i := 0 to Length(Receipts)-1 do
+         begin
+            PeriodStart := ServerDateToDateTime(Receipts[i].PeriodStart);
+            PeriodEnd := ServerDateToDateTime(Receipts[i].PeriodEnd);
+
+           // ShowMessage(Receipts[i].ProcessingDate);
+           if (PeriodStart  = APeriodStart) and
+              (PeriodEnd = APeriodEnd) then
+           begin
+              Receipt := Receipts[i];
+              break;
+           end;
+         end;
+
+      if (Receipt = nil) then
+         begin
+            Result := srNotSubmitted;
+            Exit;
+         end;
+
+      // Do the submitted figures correlate with arg AVATReturn
+      VatReturnChanged :=
+         not((Receipt.VATReturn.VATDueSales = AVATReturn.VATDueSales) and
+         (Receipt.VATReturn.VATDueAcquisitions = AVATReturn.VATDueAcquisitions) and
+         (Receipt.VATReturn.TotalVATDue = AVATReturn.TotalVATDue) and
+         (Receipt.VATReturn.VATReclaimedCurrPeriod = AVATReturn.VATReclaimedCurrPeriod) and
+         (Receipt.VATReturn.NetVATDue = AVATReturn.NetVATDue) and
+         (Receipt.VATReturn.TotalValueSalesExVAT = AVATReturn.TotalValueSalesExVAT) and
+         (Receipt.VATReturn.TotalValuePurchasesExVAT = AVATReturn.TotalValuePurchasesExVAT) and
+         (Receipt.VATReturn.TotalValueGoodsSuppliedExVAT = AVATReturn.TotalValueGoodsSuppliedExVAT) and
+         (Receipt.VATReturn.TotalAcquisitionsExVAT = AVATReturn.TotalAcquisitionsExVAT));
+       if VatReturnChanged then
+         begin
+            Result := srReturnChanged;
+            Exit;
+         end;
+
+       // this match confirms that no transactions have been created/modified for specified period.
+       // We are clear to reconcile
+       with TQuery.Create(nil) do
+         try
+           DatabaseName := AccsDataBase.DatabaseName;
+           SQL.Clear;
+           SQL.Add('SELECT * FROM VATReturn');
+           SQL.Add('WHERE (ReturnStartDate = :ReturnStartDate');
+           SQL.Add('  AND ReturnEndDate = :ReturnEndDate)');
+
+           Params[0].AsDateTime := PeriodStart;
+           Params[1].AsDateTime := PeriodEnd;
+           Open;
+           if (IsEmpty) then
+              begin
+                 Result := srNotOnFile;
+                 Exit;
+              end;
+           if (RecordCount>1) then
+              begin
+                 Result := srDuplicateOnFile;
+                 Exit;
+              end;
+         finally
+           Free;
+         end;
+
+      // ok we have a match
+      with TQuery.Create(nil) do
+        try
+          DatabaseName := AccsDataBase.DatabaseName;
+          SQL.Clear;
+          SQL.Add('UPDATE VATReturn                    ');
+          SQL.Add('SET TransactionId = :TransactionId, ');
+          SQL.Add('    Box1 = :Box1,                   ');
+          SQL.Add('    Box2 = :Box2,                   ');
+          SQL.Add('    Box3 = :Box3,                   ');
+          SQL.Add('    Box4 = :Box4,                   ');
+          SQL.Add('    Box5 = :Box5,                   ');
+          SQL.Add('    Box6 = :Box6,                   ');
+          SQL.Add('    Box7 = :Box7,                   ');
+          SQL.Add('    Box8 = :Box8,                   ');
+          SQL.Add('    Box9 = :Box9,                   ');
+          SQL.Add('    HMRCProcessingTimeStamp = :HMRCProcessingTimeStamp,');
+          SQL.Add('    HMRCPaymentIndicator = :HMRCPaymentIndicator,      ');
+          SQL.Add('    HMRCBundleNumber = :HMRCBundleNumber,              ');
+          SQL.Add('    SubmissionDate = :SubmissionDate,                  ');
+          SQL.Add('    SubmissionComplete = :SubmissionComplete,          ');
+          SQL.Add('    SubmissionReference = :BundleNumber                ');
+          SQL.Add('WHERE (ReturnStartDate = :ReturnStartDate              ');
+          SQL.Add('AND   ReturnEndDate = :ReturnEndDate)                  ');
+
+          Params[0].AsString := Receipt.TransactionId;
+          Params[1].AsFloat := Receipt.VATReturn.VATDueSales;
+          Params[2].AsFloat := Receipt.VATReturn.VATDueAcquisitions;
+          Params[3].AsFloat := Receipt.VATReturn.TotalVATDue;
+          Params[4].AsFloat := Receipt.VATReturn.VATReclaimedCurrPeriod;
+          Params[5].AsFloat := Receipt.VATReturn.NetVATDue;
+          Params[6].AsFloat := Receipt.VATReturn.TotalValueSalesExVAT;
+          Params[7].AsFloat := Receipt.VATReturn.TotalValuePurchasesExVAT;
+          Params[8].AsFloat := Receipt.VATReturn.TotalValueGoodsSuppliedExVAT;
+          Params[9].AsFloat := Receipt.VATReturn.TotalAcquisitionsExVAT;
+          Params[10].AsString := Receipt.ProcessingDate;
+          Params[11].AsString := Receipt.PaymentIndicator;
+          Params[12].AsString := Receipt.BundleNumber;
+          Params[13].AsDateTime := StrToDate(Receipt.SubmissionDate);
+          Params[14].AsBoolean := True;
+          Params[15].Value := Receipt.BundleNumber;
+          Params[16].AsDateTime := PeriodStart;
+          Params[17].AsDateTime := PeriodEnd;
+          try
+             ExecSQL;
+             Result := srReconciled;
+          except
+             on e: Exception do
+                begin
+                   ShowMessage(e.Message);
+                   Result := srReconcileFailed;
+                end;
+          end;
+        finally
+          Free;
+        end;
+    finally
+       VATReturnDB.open();
+       for i := 0 to Length(Receipts)-1 do Receipts[i].Free;
+         SetLength(Receipts, 0);
+    end;
+end;
+
+function TAccsDataModule.MTDVATSubmissionReceiptPending(
+   const APeriodStart, APeriodEnd: TDateTime): Boolean;
+begin
+   with TQuery.Create(nil) do
+     try
+       DatabaseName := AccsDataBase.DatabaseName;
+       SQL.Clear;
+       SQL.Add('SELECT * FROM VATReturn');
+       SQL.Add('WHERE (SubmitAttempted = True) ');
+       SQL.Add('AND   (HMRCBundleNumber IS NULL) ');
+       SQL.Add('AND   ((ReturnStartDate = :ReturnStartDate');
+       SQL.Add('  AND ReturnEndDate = :ReturnEndDate))');
+       Params[0].AsDateTime := APeriodStart;
+       Params[1].AsDateTime := APeriodEnd;
+       Open;
+       Result := RecordCount=1;
+     finally
+       Free;
+     end;
 end;
 
 end.

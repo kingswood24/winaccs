@@ -22,7 +22,7 @@ uses
   cxDropDownEdit, cxDBEdit, cxButtons, cxControls, cxContainer, cxEdit,
   cxGroupBox, ActnList, dxGDIPlusClasses, cxImage, cxLabel, dxBar,
   dxBarExtItems, cxHyperLinkEdit, cxStyles, cxMemo, uWinOS, HTTPApp,
-  cxCheckBox, CredentialsStore;
+  cxCheckBox, AccsData;
 
 type
   TDeviceInfo = record
@@ -138,6 +138,8 @@ type
     cxImage3: TcxImage;
     RetrieveRecieptLabel: TcxLabel;
     btnRetrieveReceipt: TcxButton;
+    blbSync: TdxBarLargeButton;
+    actSync: TAction;
     procedure RunBtnClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure SalesGridDrawCell(Sender: TObject; ACol, ARow: Integer;
@@ -187,6 +189,7 @@ type
     FMTDHomeURL : string;
     FReconcileActive : Boolean;
     FSubmissionCompletionPending : Boolean;
+    FSubmissionPending: Boolean;
     procedure ApplicationActivate(Sender: TObject);
     procedure MoveToStage(AStep: Integer);
     procedure SubmitReturn();
@@ -196,7 +199,8 @@ type
        const AOKButtonCaption:string; const ACancelButtonCaption: string; AMsgDlgType: TMsgDlgType): Integer;
     procedure ProcessReceiptFromClipboard();
     procedure RetrieveReceiptFromAPI();
-
+    function Reconcile() : TMTDReconcileResult;
+    procedure CompleteUKVATReturn(const AConfirmationId: string; const AReconciled: Boolean = False);
     // Support for MTD Anti Fraud Measures
     function ClientDeviceID : string;
     function GetDeviceInfo : TDeviceInfo;
@@ -221,9 +225,9 @@ const
 implementation
 
 Uses
-   DigitalVAT, VARS, uVatAuditReport, Calcs, Clears, uVatReport, Types, AccsData, uNIVatReport,
+   DigitalVAT, VARS, uVatAuditReport, Calcs, Clears, uVatReport, Types, uNIVatReport,
    UVATSetup, MD5, ShellApi, ActiveX, uVATSubmissionReportForm, AccsUtils,
-   uAccsSystem, DbCore, Registry, uAccounts, uMTDApi, LoginCredentials,
+   uAccsSystem, DbCore, Registry, uAccounts, uMTDApi, CredentialsStore, LoginCredentials,
    uLoginCredentials;
 
 {$R *.DFM}
@@ -243,9 +247,19 @@ var
    Info : TVATReturnInfo;
    Msg: string;
 begin
-
-
    Screen.Cursor := crHourGlass;
+   Accsdatamodule.VATReturnDB.Open();
+   if not Accsdatamodule.VATReturnDB.Locate('ReturnID',PeriodLookup.KeyValue,[]) then
+      begin
+         Screen.Cursor := crDefault;
+         MessageDlg('Period key not found',mtError,[mbOK],0);
+         Exit;
+      end;
+
+   FSubmissionPending := (AccsDataModule.MTDVATSubmissionReceiptPending(
+    StrToDate(Accsdatamodule.VATReturnDB['ReturnStartDate']),
+                       StrToDate(Accsdatamodule.VATReturnDB['ReturnEndDate'])));
+
    try
    // 11/03/2019 - SP
    FReceiptCopied := False;
@@ -290,16 +304,17 @@ begin
 
         if gbSelectPeriod.Visible then begin
                  TempInt := PeriodLookup.KeyValue;
-                 Accsdatamodule.VATReturnDB.open;
+                 
                  Accsdatamodule.VATReturnDB.Locate('ReturnID',TempInt,[]);
 
                  if (cash2.xcountry = 1) then
                      begin
+                     
                         Info := AccsDataModule.GetLastVATReturnInfo();
                         if (Info.IsPending) then
                            begin
-                              if (Accsdatamodule.VATReturnDB['DisplayString'] = Info.Period) then
-                                 begin
+                              if (Accsdatamodule.VATReturnDB['DisplayString'] <> Info.Period) then
+                                 {begin
                                     Msg := Format('You have already made a submission for this period ''%s'', although '+ cCRLF +
                                                   'Kingswood Accounts did not receive the MTD receipt.' + cCRLFx2 +
                                                   'If you are confident that your VAT return for this period has been submitted successfully '+ cCRLF +
@@ -316,12 +331,13 @@ begin
                                     // else
                                     // Allow user to attempt another submission for selected period.
                                  end
-                              else
+                              else}
                                  begin
                                     MessageDlg(Format('We''re sorry, but you cannot continue with this VAT return.' + cCRLFx2 +
                                                       'It appears you have submitted a VAT return to HMRC for period ''%s'','+ cCRLF +
                                                       'which has not been fully processed by Kingswood Accounts.' +cCRLFx2 +
                                                       'Please contact TGM Software/Kingswood Computing for help.',[Info.Period]),mtWarning,[mbOK],0);
+                                    PeriodLookup.Enabled := True;
                                     Exit;
                                  end;
                            end;
@@ -558,10 +574,11 @@ begin
 
                 end;
 
+       PeriodLookup.enabled := False;
        MoveToStage(2);
+
    finally
              Runbtn.enabled := False;
-             PeriodLookup.enabled := False;
 
              Screen.Cursor := crDefault;
    end;
@@ -574,6 +591,7 @@ var
         sl: TStringList;
         FileName: string;
 begin
+   FSubmissionPending := False;
    lNewSignupMessageText.Text := Format(NewSignupMessageText, [PSysLongToDelphi ( Cash11.serial_no )]);
 
    // 11/03/2109 - SP
@@ -950,96 +968,16 @@ begin
 end;
 
 procedure TDigitalVATForm.CompleteUKReturnClick(Sender: TObject);
-var
-        NewReturnID : Integer;
-        MyQuery : TQuery;
 begin
-
-   if confirmation.text <> '' then begin
-
-        PreviewUKReport.enabled := False;
-
-        Accsdatamodule.VATReturnDB.Locate('TransactionId;ReturnID',VarArrayOf([FTransactionId,PeriodLookup.KeyValue]),[]);
-        Accsdatamodule.VATReturnDB.edit;
-
-        AccsDataModule.VATReturnDB['Box1'] := Box1.text;
-        AccsDataModule.VATReturnDB['Box2'] := Box2.text;
-        AccsDataModule.VATReturnDB['Box3'] := Box3.text;
-        AccsDataModule.VATReturnDB['Box4'] := Box4.text;
-        AccsDataModule.VATReturnDB['Box5'] := Box5.text;
-        AccsDataModule.VATReturnDB['Box6'] := Box6.text;
-        AccsDataModule.VATReturnDB['Box7'] := Box7.text;
-        AccsDataModule.VATReturnDB['Box8'] := Box8.text;
-        AccsDataModule.VATReturnDB['Box9'] := Box9.text;
-
-        AccsDataModule.VATReturnDB['SubmissionDate'] := Now;
-        AccsDataModule.VATReturnDB['SubmissionComplete'] := True;
-        AccsDataModule.VATReturnDB['SubmissionReference'] := Confirmation.text;
-
-        if (FReceiptCopied) then
-          begin
-             AccsDataModule.VATReturnDB['HMRCProcessingTimeStamp'] := FHMRCProcessingTimeStamp;
-             AccsDataModule.VATReturnDB['HMRCPaymentIndicator'] := FHMRCPaymentIndicator;
-             AccsDataModule.VATReturnDB['HMRCBundleNumber'] := FHMRCBundleNumber;
-          end;
-
-        AccsDataModule.VATReturnDB.Post;
-
-        NewReturnID := AccsDataModule.VATReturnDB['ReturnID'];
-
-        // Archive Report
-
-        MyQuery := TQuery.create(self);
-        Myquery.DatabaseName := accsdatamodule.AccsDataBase.databasename;
-        MyQuery.SQL.clear;
-        MyQuery.SQL.add ('Update TempVAT set VATID =' + vartostr(NewReturnID));
-        MyQuery.ExecSQL;
-
-        MyQuery.SQL.clear;
-        MyQuery.SQL.add ('INSERT INTO VATArchive');
-        MyQuery.SQL.add ('SELECT * FROM TempVAT');
-        MyQuery.ExecSQL;
-
-        MyQuery.close;
-        MyQuery.free;
-
-        // End Archive
-
-        if ((cash2.XAllocation) and (cash2.XPaymentVAT)) then begin      // Payment VAT
-
-                 DigitalVAT.PaymentVatAuditTrail('S',True,NewReturnID,VATSpansYears);
-                 DigitalVAT.PaymentVatAuditTrail('P',True,NewReturnID,VATSpansYears);
-
-
-             end else begin     // Invoice VAT
-                            DigitalVAT.InvoiceVatAuditTrail('S',True,NewReturnID,VATSpansYears);
-                            DigitalVAT.InvoiceVatAuditTrail('P',True,NewReturnID,VATSpansYears);
-
-                end;
-
-
-        PrintUKReturn.enabled := True;
-        SubmitUKReturn.enabled := False;
-        CompleteUKReturn.enabled := False;
-        actCancelReturn.enabled := False;
-        NewRtnBtn.enabled := True;
-
-        FSubmitAttempted := False;
-
-        MoveToStage(4);
-
-        //MessageDlg('VAT Return Submission Complete.',mtInformation,[mbOK],0);
-
-   end
-       else begin
-
-        MoveToStage(5);
-
-        MessageDlg('No valid Confirmation Reference Entered.',mtWarning,[mbOK],0);
-
-       end;
-
-
+   if Trim(Confirmation.Text) <> '' then
+      begin
+         CompleteUKVATReturn(Trim(Confirmation.Text));
+      end
+   else
+      begin
+         MoveToStage(5);
+         MessageDlg('No valid Confirmation Reference Entered.',mtWarning,[mbOK],0);
+     end;
 end;
 
 procedure TDigitalVATForm.VatRepDateExit(Sender: TObject);
@@ -1209,6 +1147,7 @@ var
    DeviceInfo : TDeviceInfo;
 
    LoginCredentials: TLoginCredentials;
+   ReconcileResult:TMTDReconcileResult;
 begin
 
    // Ch023 AB 15/05/20 - Added check & prompt to user to review Audit Trial Before Submitting Return
@@ -1228,6 +1167,66 @@ begin
          Exit;
       end;
 
+   if FSubmissionPending then
+      begin
+
+         ReconcileResult := Reconcile();
+         case ReconcileResult of
+         crLoginCredentialMissing:
+         begin
+            MessageDlg('Your Kingswood MTD Login credentials have not been entered - contact TGM.',
+                       mtWarning,[mbOK],0);
+            Abort;
+         end;
+         srUnavailable:
+         begin
+            MessageDlg('Unable to retrieve information from Kingswood API.' +cCRLF +
+                       'Please ensure your internet connection is online.',
+                       mtWarning,[mbOK],0);
+            Abort;
+         end;
+         srReturnChanged:
+          begin
+             MessageDlg('There is a discrepancy between the figures previously submitted ' +cCRLF +
+                        'to HMRC for this period and the figures currently being submitted - contact TGM.',
+                        mtError,[mbOK],0);
+             Abort();
+          end;
+         srNotOnFile:
+         begin
+                         // allow submission to proceed
+
+         end;
+         srDuplicateOnFile:
+         begin
+             MessageDlg('Duplicate submission held on file - contact TGM.',
+             mtWarning,[mbOK],0);
+             Abort();
+         end;
+         srNotSubmitted:
+         begin
+                         // allow submission to proceed
+         end;
+         srReconcileFailed:
+         begin
+             MessageDlg('An internal error occurred while processing your VAT return - contact TGM.',
+             mtError,[mbOK],0);
+             Abort();
+         end;
+         srReconciled:
+         begin
+            MessageDlg('A VAT return for this period was previously submitted to HMRC.'+cCRLFx2 +
+                       'Click OK to finalise VAT Return in Kingswood Accounts.',
+                       mtInformation,[mbOK],0);
+
+            if (Accsdatamodule.VATReturnDB.Locate('ReturnID',PeriodLookup.KeyValue,[])) then
+            begin
+               CompleteUKVATReturn(Accsdatamodule.VATReturnDB['HMRCBundleNumber'],True);
+               Exit;
+            end;
+         end;
+      end;
+   end;
    FTransactionId := GUID();
    FSubmitAttempted := True;
 
@@ -1727,7 +1726,7 @@ begin
          end
       else
          begin
-            FHMRCProcessingTimeStamp := VATReceipt.ProcessingTimeStamp;
+            FHMRCProcessingTimeStamp := VATReceipt.ProcessingDate;
             FHMRCPaymentIndicator := VATReceipt.PaymentIndicator;
             FHMRCBundleNumber := VATReceipt.BundleNumber;
 
@@ -1742,6 +1741,131 @@ begin
    finally
       FreeAndNil(MTDApi);
       FreeAndNil(VATReceipt);
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+function TDigitalVATForm.Reconcile(): TMTDReconcileResult;
+var
+   VATReturn: TMTDVATReturn;
+begin
+   Screen.Cursor := crHourGlass;
+   VATReturn := TMTDVATReturn.Create();
+   try
+      VATReturn.VATDueSales := StrToFloat(Box1.Text);
+      VATReturn.VATDueAcquisitions := StrToFloat(Box2.Text);
+      VATReturn.TotalVATDue := StrToFloat(Box3.Text);
+      VATReturn.VATReclaimedCurrPeriod := StrToFloat(Box4.Text);
+      VATReturn.NetVATDue := StrToFloat(Box5.Text);
+      VATReturn.TotalValueSalesExVAT := trunc(StrToFloat(Box6.Text));
+      VATReturn.TotalValuePurchasesExVAT := trunc(StrToFloat(Box7.Text));
+      VATReturn.TotalValueGoodsSuppliedExVAT := trunc(StrToFloat(Box8.Text));
+      VATReturn.TotalAcquisitionsExVAT := trunc(StrToFloat(Box9.Text));
+
+      Accsdatamodule.VATReturnDB.open;
+      if not Accsdatamodule.VATReturnDB.Locate('ReturnID',PeriodLookup.KeyValue,[]) then
+         begin
+            MessageDlg('VAT period not found.',MtError,[mbOK],0);
+            Exit;
+         end;
+
+      Result := AccsDataModule.ReconcileLastMTDSubmission(
+                    Accsdatamodule.VATReturnDB['ReturnStartDate'],
+                    Accsdatamodule.VATReturnDB['ReturnEndDate'],VATReturn);
+   finally
+      FreeAndNil(VATReturn);
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+procedure TDigitalVATForm.CompleteUKVATReturn(
+  const AConfirmationId: string; const AReconciled: Boolean);
+var
+   NewReturnID : Integer;
+   MyQuery : TQuery;
+begin
+   if (Trim(AConfirmationId)='') and (not AReconciled) then Exit;
+   try
+      Screen.Cursor := crHourGlass;
+
+   PreviewUKReport.enabled := False;
+
+   if (not AReconciled) then
+      begin
+         Accsdatamodule.VATReturnDB.Locate('TransactionId;ReturnID',VarArrayOf([FTransactionId,PeriodLookup.KeyValue]),[]);
+         Accsdatamodule.VATReturnDB.edit;
+
+         AccsDataModule.VATReturnDB['Box1'] := Box1.text;
+         AccsDataModule.VATReturnDB['Box2'] := Box2.text;
+         AccsDataModule.VATReturnDB['Box3'] := Box3.text;
+         AccsDataModule.VATReturnDB['Box4'] := Box4.text;
+         AccsDataModule.VATReturnDB['Box5'] := Box5.text;
+         AccsDataModule.VATReturnDB['Box6'] := Box6.text;
+         AccsDataModule.VATReturnDB['Box7'] := Box7.text;
+         AccsDataModule.VATReturnDB['Box8'] := Box8.text;
+         AccsDataModule.VATReturnDB['Box9'] := Box9.text;
+
+         AccsDataModule.VATReturnDB['SubmissionDate'] := Now;
+         AccsDataModule.VATReturnDB['SubmissionComplete'] := True;
+         AccsDataModule.VATReturnDB['SubmissionReference'] := AConfirmationId;
+
+         if (FReceiptCopied) then
+           begin
+              AccsDataModule.VATReturnDB['HMRCProcessingTimeStamp'] := FHMRCProcessingTimeStamp;
+              AccsDataModule.VATReturnDB['HMRCPaymentIndicator'] := FHMRCPaymentIndicator;
+              AccsDataModule.VATReturnDB['HMRCBundleNumber'] := FHMRCBundleNumber;
+           end;
+
+         AccsDataModule.VATReturnDB.Post;
+      end
+   else
+      begin
+         lBundleNumber.Caption := AccsDataModule.VATReturnDB['SubmissionReference'];
+      end;
+
+   NewReturnID := AccsDataModule.VATReturnDB['ReturnID'];
+
+   // Archive Report
+
+   MyQuery := TQuery.create(self);
+   Myquery.DatabaseName := accsdatamodule.AccsDataBase.databasename;
+   MyQuery.SQL.clear;
+   MyQuery.SQL.add ('Update TempVAT set VATID =' + vartostr(NewReturnID));
+   MyQuery.ExecSQL;
+
+   MyQuery.SQL.clear;
+   MyQuery.SQL.add ('INSERT INTO VATArchive');
+   MyQuery.SQL.add ('SELECT * FROM TempVAT');
+   MyQuery.ExecSQL;
+
+   MyQuery.close;
+   MyQuery.free;
+
+   // End Archive
+
+   if ((cash2.XAllocation) and (cash2.XPaymentVAT)) then begin      // Payment VAT
+
+            DigitalVAT.PaymentVatAuditTrail('S',True,NewReturnID,VATSpansYears);
+            DigitalVAT.PaymentVatAuditTrail('P',True,NewReturnID,VATSpansYears);
+
+
+        end else begin     // Invoice VAT
+                       DigitalVAT.InvoiceVatAuditTrail('S',True,NewReturnID,VATSpansYears);
+                       DigitalVAT.InvoiceVatAuditTrail('P',True,NewReturnID,VATSpansYears);
+
+           end;
+
+
+   PrintUKReturn.enabled := True;
+   SubmitUKReturn.enabled := False;
+   CompleteUKReturn.enabled := False;
+   actCancelReturn.enabled := False;
+   NewRtnBtn.enabled := True;
+
+   FSubmitAttempted := False;
+
+   MoveToStage(4);
+   finally
       Screen.Cursor := crDefault;
    end;
 end;

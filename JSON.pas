@@ -823,7 +823,7 @@ var
    bResult: Boolean;
 begin
   bResult := TryStrToFloat(PChar(S), Result);
-  if bResult then
+  if not bResult then
     Result := Default;
 end;
 

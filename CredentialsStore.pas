@@ -18,7 +18,8 @@ uses
 
 { TCredentialsStore }
 
-class function TCredentialsStore.IsStoredFor(const AStorePath: string): Boolean;
+class function TCredentialsStore.IsStoredFor(
+  const AStorePath: string): Boolean;
 var
    LoginCredentials: TLoginCredentials;
 begin
@@ -26,7 +27,8 @@ begin
    Result := (LoginCredentials <> nil) and (LoginCredentials.IsFilled);
 end;
 
-class function TCredentialsStore.Load(const AStorePath: string): TLoginCredentials;
+class function TCredentialsStore.Load(
+  const AStorePath: string): TLoginCredentials;
 var
    Params : TStringList;
    FileName: string;
@@ -49,7 +51,8 @@ begin
    end;
 end;
 
-class function TCredentialsStore.Save(ALoginCredentials: TLoginCredentials; const AStorePath: string): boolean;
+class function TCredentialsStore.Save(
+  ALoginCredentials: TLoginCredentials; const AStorePath: string): boolean;
 var
    Params : TStringList;
 begin

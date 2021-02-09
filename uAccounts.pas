@@ -287,14 +287,26 @@ type
 
    TMTDVATReceipt = class
    private
-     FProcessingTimeStamp: string;
+     FTransactionId: string;
      FBundleNumber: string;
+     FChargeRefNumber: string;
      FPaymentIndicator: string;
+     FProcessingDate: string;
+     FPeriodStart: string;
+     FPeriodEnd: string;
+     FDueBy: string;
+     FSubmissionDate: string;
      FVATReturn: TMTDVATReturn;
     public
-     property ProcessingTimeStamp: string read FProcessingTimeStamp write FProcessingTimeStamp;
-     property PaymentIndicator: string read FPaymentIndicator write FPaymentIndicator;
+     property TransactionId: string read FTransactionId write FTransactionId;
      property BundleNumber: string read FBundleNumber write FBundleNumber;
+     property ChargeRefNumber: string read FChargeRefNumber write FChargeRefNumber;
+     property PaymentIndicator: string read FPaymentIndicator write FPaymentIndicator;
+     property ProcessingDate: string read FProcessingDate write FProcessingDate;
+     property PeriodStart: string read FPeriodStart write FPeriodStart;
+     property PeriodEnd: string read FPeriodEnd write FPeriodEnd;
+     property DueBy: string read FDueBy write FDueBy;
+     property SubmissionDate: string read FSubmissionDate write FSubmissionDate;
      property VATReturn: TMTDVATReturn read FVATReturn write FVATReturn;
      function CreateStamp(const ATransactionId: string): string;
      constructor create;
@@ -1252,7 +1264,7 @@ function TMTDVATReceipt.CreateStamp(const ATransactionId: string): string;
 begin
    try
       Result := Format('KW_MTD_TRANSACTION_ID={%s}&PROCESSING_DATE={%s}&PAYMENT_INDICATOR={%s}&FORM_BUNDLE_NUMBER={%s}&CHARGE_REF_NUMBER={%s}',
-       [ATransactionId,FProcessingTimeStamp,FPaymentIndicator,FBundleNumber,'']);
+       [ATransactionId,FProcessingDate,FPaymentIndicator,FBundleNumber,'']);
    except
       Result := '';
    end;

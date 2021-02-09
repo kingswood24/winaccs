@@ -156,24 +156,23 @@ uses
   uProductListing in 'uProductListing.pas' {ProductListingForm},
   JobCardReportSetup in 'JobCardReportSetup.pas' {JobCardReportSetupForm},
   uAccountsHelp in 'uAccountsHelp.pas',
-  QRExportHelper in '..\..\..\..\Common\QRExportHelper.pas',
-  uApplicationLog in '..\..\..\..\Common\uApplicationLog.pas',
-  Def in '..\..\..\..\Common\Def.pas',
-  uIntList in '..\..\..\..\Common\uIntList.pas',
-  uConnect in '..\..\..\..\Common\uConnect.pas' {fmDialupConnect},
-  ChkDebug in '..\..\..\..\Common\ChkDebug.pas',
-  cxUtils in '..\..\..\..\Common\cxUtils.pas',
-  DCPCryptManagement in '..\..\..\..\Common\DCPCryptManagement.pas',
-  uOnlineBackupHelper in '..\..\..\..\Common\uOnlineBackupHelper.pas',
+  QRExportHelper in '..\..\..\Common\QRExportHelper.pas',
+  uApplicationLog in '..\..\..\Common\uApplicationLog.pas',
+  Def in '..\..\..\Common\Def.pas',
+  uIntList in '..\..\..\Common\uIntList.pas',
+  uConnect in '..\..\..\Common\uConnect.pas' {fmDialupConnect},
+  ChkDebug in '..\..\..\Common\ChkDebug.pas',
+  cxUtils in '..\..\..\Common\cxUtils.pas',
+  DCPCryptManagement in '..\..\..\Common\DCPCryptManagement.pas',
+  uOnlineBackupHelper in '..\..\..\Common\uOnlineBackupHelper.pas',
   uDataBackup in 'uDataBackup.pas' {fmDataBackup},
-  uWinOS in '..\..\..\..\Common\uWinOS.pas',
-  uBackupDevice in '..\..\..\..\Common\uBackupDevice.pas' {BackupDevice},
-  uDownloadValidation in '..\..\..\..\Common\uDownloadValidation.pas',
-  UserMsgConst in '..\..\..\..\Common\UserMsgConst.pas',
-  uDataRestoreConfirm in '..\..\..\..\Common\uDataRestoreConfirm.pas' {fmDataRestoreConfirm},
-  uKingswoodAccessControllerBase in '..\..\..\..\Common\uKingswoodAccessControllerBase.pas',
-  uFileEncrypt in '..\..\..\..\Common\uFileEncrypt.pas',
-  Drawing in '..\..\..\..\Common\Drawing.pas',
+  uBackupDevice in '..\..\..\Common\uBackupDevice.pas' {BackupDevice},
+  uDownloadValidation in '..\..\..\Common\uDownloadValidation.pas',
+  UserMsgConst in '..\..\..\Common\UserMsgConst.pas',
+  uDataRestoreConfirm in '..\..\..\Common\uDataRestoreConfirm.pas' {fmDataRestoreConfirm},
+  uKingswoodAccessControllerBase in '..\..\..\Common\uKingswoodAccessControllerBase.pas',
+  uFileEncrypt in '..\..\..\Common\uFileEncrypt.pas',
+  Drawing in '..\..\..\Common\Drawing.pas',
   UYearEndTransWarning in 'UYearEndTransWarning.pas' {FYearEndTransWarning},
   uPaymentVAT in 'uPaymentVAT.pas',
   MSXML2_TLB in 'MSXML2_TLB.pas',
@@ -189,7 +188,7 @@ uses
   UNominalSetUp in 'UNominalSetUp.pas',
   uBankAuditTrailReport in 'uBankAuditTrailReport.pas' {BankAuditTrialReport: TQuickRep},
   uEditAssocItem in 'uEditAssocItem.pas' {fmEditAssocItem},
-  uDefImgStore in '..\..\..\..\Common\uDefImgStore.pas' {fmDefImgStore},
+  uDefImgStore in '..\..\..\Common\uDefImgStore.pas' {fmDefImgStore},
   uAccsNewFeatures in 'uAccsNewFeatures.pas' {fmAccsNewFeatures},
   uVATSubmissionReportForm in 'uVATSubmissionReportForm.pas' {VATSubmissionReportForm},
   UVATSetup in 'UVATSetup.pas' {VATSetupForm},
@@ -202,10 +201,9 @@ uses
   uSimplePurchaseInvoiceFrame in 'uSimplePurchaseInvoiceFrame.pas' {SimplePurchaseInvoiceFrame: TFrame},
   SimpleAccsDataModule in 'SimpleAccsDataModule.pas' {SimpleAccsData: TDataModule},
   uSimpleInvoiceBaseFrame in 'uSimpleInvoiceBaseFrame.pas' {SimpleInvoiceBaseFrame: TFrame},
-  uCallToExternalProgram in '..\..\..\..\Common\uCallToExternalProgram.pas',
   ABChangeRegister in 'ABChangeRegister.pas',
-  ProgramUpdateThread in '..\..\..\..\Common\ProgramUpdateThread.pas',
-  ProgramMaintenanceCheckThread in '..\..\..\..\Common\ProgramMaintenanceCheckThread.pas',
+  ProgramUpdateThread in '..\..\..\Common\ProgramUpdateThread.pas',
+  ProgramMaintenanceCheckThread in '..\..\..\Common\ProgramMaintenanceCheckThread.pas',
   uMTDApi in 'uMTDApi.pas',
   JSON in 'JSON.pas',
   LoginCredentials in 'LoginCredentials.pas',
@@ -214,9 +212,11 @@ uses
   CredentialsStore in 'CredentialsStore.pas',
   uRestoreToNewCompanyName in 'uRestoreToNewCompanyName.pas' {fmRestoreToNewCompanyName},
   uBankLinkNoFileFound in 'uBankLinkNoFileFound.pas' {fmBankLinkNoFileFound},
-  KRoutines in '..\..\..\..\Common\KRoutines.pas',
   uReviewFarmFinances in 'uReviewFarmFinances.pas' {fmReviewFarmFinances},
-  Win7 in '..\..\..\..\Common\Win7.pas';
+  Win7 in '..\..\..\Common\Win7.pas',
+  uWinOS in '..\..\..\Common\uWinOS.pas',
+  uCallToExternalProgram in '..\..\..\Common\uCallToExternalProgram.pas',
+  KRoutines in '..\..\..\Common\KRoutines.pas';
 
 // TGM AB 04/06/15
 
@@ -254,7 +254,7 @@ begin
 
    Application.Initialize;
    //shortdateformat :=  'dd/mm/yy';
-  {MTDCredentials := TLoginCredentials.create('286616720','m9c6d7r7');
+  {MTDCredentials := TLoginCredentials.create('','');
   MTDApi := TMTDApi.create(MTDCredentials);
   MTDApi.GetReceipt('D3E7C10F-63F2-4891-AA42-2A98562DC6EC');
   Exit;}

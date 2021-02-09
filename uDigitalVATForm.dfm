@@ -1,6 +1,6 @@
 object DigitalVATForm: TDigitalVATForm
-  Left = 448
-  Top = 136
+  Left = 474
+  Top = 202
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   BorderStyle = bsDialog
@@ -21,6 +21,162 @@ object DigitalVATForm: TDigitalVATForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 17
+  object gbCompleteReturn: TcxGroupBox
+    Left = 32
+    Top = 64
+    Caption = 'VAT Return completion'
+    ParentFont = False
+    Style.BorderStyle = ebsFlat
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -13
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = [fsBold]
+    Style.IsFontAssigned = True
+    TabOrder = 10
+    Visible = False
+    Height = 390
+    Width = 500
+    object pCompleteReturn: TPanel
+      Left = 0
+      Top = 32
+      Width = 500
+      Height = 105
+      BevelOuter = bvNone
+      TabOrder = 2
+      object lEnterFormNumber: TLabel
+        Left = 20
+        Top = -4
+        Width = 316
+        Height = 17
+        Caption = 'Enter Form Bundle Number to complete VAT Return'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object Confirmation: TEdit
+        Left = 120
+        Top = 24
+        Width = 288
+        Height = 25
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 0
+        OnChange = ConfirmationChange
+      end
+      object btnCompleteReturn: TcxButton
+        Left = 282
+        Top = 51
+        Width = 125
+        Height = 33
+        Action = actCompleteReturn
+        Default = True
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 1
+        LookAndFeel.Kind = lfOffice11
+      end
+      object cxLabel4: TcxLabel
+        Left = 20
+        Top = 25
+        Caption = 'Bundle Number:'
+        ParentFont = False
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -13
+        Style.Font.Name = 'Segoe UI'
+        Style.Font.Style = []
+        Style.IsFontAssigned = True
+      end
+    end
+    object pVATReturnError: TPanel
+      Left = 38
+      Top = 280
+      Width = 429
+      Height = 65
+      BevelOuter = bvNone
+      TabOrder = 1
+      Visible = False
+      object cxImage2: TcxImage
+        Left = 16
+        Top = 12
+        Style.BorderStyle = ebsNone
+        Style.Color = clMenu
+        TabOrder = 0
+        Height = 44
+        Width = 49
+      end
+      object cxLabel2: TcxLabel
+        Left = 62
+        Top = 14
+        Caption = 'VAT Return was not completed.'
+        ParentFont = False
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -21
+        Style.Font.Name = 'Segoe UI Semibold'
+        Style.Font.Style = [fsBold]
+        Style.TextColor = 4342527
+        Style.IsFontAssigned = True
+      end
+    end
+    object pVATReturnSuccess: TPanel
+      Left = 38
+      Top = 160
+      Width = 429
+      Height = 114
+      BevelOuter = bvNone
+      TabOrder = 0
+      object cxImage1: TcxImage
+        Left = 16
+        Top = 37
+        Style.BorderStyle = ebsNone
+        Style.Color = clMenu
+        TabOrder = 0
+        Height = 44
+        Width = 49
+      end
+      object cxLabel1: TcxLabel
+        Left = 46
+        Top = 39
+        Caption = 'VAT Return successfully completed.'
+        ParentFont = False
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -21
+        Style.Font.Name = 'Segoe UI Semibold'
+        Style.Font.Style = [fsBold]
+        Style.TextColor = 2331736
+        Style.IsFontAssigned = True
+      end
+      object lBundleNumber: TcxLabel
+        Left = 0
+        Top = 0
+        Align = alTop
+        Caption = '{Bundle_Number}'
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -21
+        Style.Font.Name = 'Segoe UI Semibold'
+        Style.Font.Style = [fsBold]
+        Style.TextColor = 6381921
+        Style.IsFontAssigned = True
+      end
+    end
+  end
   object gbSelectPeriod: TcxGroupBox
     Left = 32
     Top = 64
@@ -217,9 +373,9 @@ object DigitalVATForm: TDigitalVATForm
     Height = 390
     Width = 500
     object box1lbl: TLabel
-      Left = 87
+      Left = 89
       Top = 32
-      Width = 160
+      Width = 158
       Height = 17
       Alignment = taRightJustify
       Caption = 'VAT Due from Sales (Box 1)'
@@ -231,9 +387,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box2lbl: TLabel
-      Left = 29
+      Left = 31
       Top = 62
-      Width = 218
+      Width = 216
       Height = 17
       Alignment = taRightJustify
       Caption = 'VAT Due from EC Acquisitions (Box 2)'
@@ -245,9 +401,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box3lbl: TLabel
-      Left = 120
+      Left = 123
       Top = 92
-      Width = 127
+      Width = 124
       Height = 17
       Alignment = taRightJustify
       Caption = 'Total VAT Due (Box 3)'
@@ -259,9 +415,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box4lbl: TLabel
-      Left = 74
+      Left = 76
       Top = 122
-      Width = 173
+      Width = 171
       Height = 17
       Alignment = taRightJustify
       Caption = 'VAT Reclaimed inc. EC (Box 4)'
@@ -287,9 +443,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box6lbl: TLabel
-      Left = 96
+      Left = 99
       Top = 182
-      Width = 151
+      Width = 148
       Height = 17
       Alignment = taRightJustify
       Caption = 'Total Sales Ex VAT (Box 6)'
@@ -301,9 +457,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box7lbl: TLabel
-      Left = 68
+      Left = 71
       Top = 212
-      Width = 179
+      Width = 176
       Height = 17
       Alignment = taRightJustify
       Caption = 'Total Purchases Ex VAT (Box 7)'
@@ -315,9 +471,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box8lbl: TLabel
-      Left = 58
+      Left = 61
       Top = 242
-      Width = 189
+      Width = 186
       Height = 17
       Alignment = taRightJustify
       Caption = 'Total EC Supplies Ex VAT (Box 8)'
@@ -329,9 +485,9 @@ object DigitalVATForm: TDigitalVATForm
       ParentFont = False
     end
     object Box9lbl: TLabel
-      Left = 38
+      Left = 41
       Top = 272
-      Width = 209
+      Width = 206
       Height = 17
       Alignment = taRightJustify
       Caption = 'Total EC Acquisitions Ex VAT (Box 9)'
@@ -542,162 +698,6 @@ object DigitalVATForm: TDigitalVATForm
       Width = 121
     end
   end
-  object gbCompleteReturn: TcxGroupBox
-    Left = 32
-    Top = 64
-    Caption = 'VAT Return completion'
-    ParentFont = False
-    Style.BorderStyle = ebsFlat
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -13
-    Style.Font.Name = 'Segoe UI'
-    Style.Font.Style = [fsBold]
-    Style.IsFontAssigned = True
-    TabOrder = 10
-    Visible = False
-    Height = 390
-    Width = 500
-    object pCompleteReturn: TPanel
-      Left = 0
-      Top = 32
-      Width = 500
-      Height = 105
-      BevelOuter = bvNone
-      TabOrder = 2
-      object lEnterFormNumber: TLabel
-        Left = 20
-        Top = -4
-        Width = 316
-        Height = 17
-        Caption = 'Enter Form Bundle Number to complete VAT Return'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object Confirmation: TEdit
-        Left = 120
-        Top = 24
-        Width = 288
-        Height = 25
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Segoe UI'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 0
-        OnChange = ConfirmationChange
-      end
-      object btnCompleteReturn: TcxButton
-        Left = 282
-        Top = 51
-        Width = 125
-        Height = 33
-        Action = actCompleteReturn
-        Default = True
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Segoe UI'
-        Font.Style = []
-        ParentFont = False
-        TabOrder = 1
-        LookAndFeel.Kind = lfOffice11
-      end
-      object cxLabel4: TcxLabel
-        Left = 20
-        Top = 25
-        Caption = 'Bundle Number:'
-        ParentFont = False
-        Style.Font.Charset = ANSI_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -13
-        Style.Font.Name = 'Segoe UI'
-        Style.Font.Style = []
-        Style.IsFontAssigned = True
-      end
-    end
-    object pVATReturnError: TPanel
-      Left = 38
-      Top = 280
-      Width = 429
-      Height = 65
-      BevelOuter = bvNone
-      TabOrder = 1
-      Visible = False
-      object cxImage2: TcxImage
-        Left = 16
-        Top = 12
-        Style.BorderStyle = ebsNone
-        Style.Color = clMenu
-        TabOrder = 0
-        Height = 44
-        Width = 49
-      end
-      object cxLabel2: TcxLabel
-        Left = 62
-        Top = 14
-        Caption = 'VAT Return was not completed.'
-        ParentFont = False
-        Style.Font.Charset = ANSI_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -21
-        Style.Font.Name = 'Segoe UI Semibold'
-        Style.Font.Style = [fsBold]
-        Style.TextColor = 4342527
-        Style.IsFontAssigned = True
-      end
-    end
-    object pVATReturnSuccess: TPanel
-      Left = 38
-      Top = 160
-      Width = 429
-      Height = 114
-      BevelOuter = bvNone
-      TabOrder = 0
-      object cxImage1: TcxImage
-        Left = 16
-        Top = 37
-        Style.BorderStyle = ebsNone
-        Style.Color = clMenu
-        TabOrder = 0
-        Height = 44
-        Width = 49
-      end
-      object cxLabel1: TcxLabel
-        Left = 46
-        Top = 39
-        Caption = 'VAT Return successfully completed.'
-        ParentFont = False
-        Style.Font.Charset = ANSI_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -21
-        Style.Font.Name = 'Segoe UI Semibold'
-        Style.Font.Style = [fsBold]
-        Style.TextColor = 2331736
-        Style.IsFontAssigned = True
-      end
-      object lBundleNumber: TcxLabel
-        Left = 0
-        Top = 0
-        Align = alTop
-        Caption = '{Bundle_Number}'
-        ParentFont = False
-        Properties.Alignment.Horz = taCenter
-        Style.Font.Charset = ANSI_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = -21
-        Style.Font.Name = 'Segoe UI Semibold'
-        Style.Font.Style = [fsBold]
-        Style.TextColor = 6381921
-        Style.IsFontAssigned = True
-      end
-    end
-  end
   object FiguresPanel: TGroupBox
     Left = 1144
     Top = 128
@@ -716,7 +716,7 @@ object DigitalVATForm: TDigitalVATForm
       object Label1: TLabel
         Left = 32
         Top = 8
-        Width = 32
+        Width = 31
         Height = 13
         Caption = 'Sales'
         Font.Charset = DEFAULT_CHARSET
@@ -729,7 +729,7 @@ object DigitalVATForm: TDigitalVATForm
       object Label2: TLabel
         Left = 32
         Top = 272
-        Width = 60
+        Width = 59
         Height = 13
         Caption = 'Purchases'
         Font.Charset = DEFAULT_CHARSET
@@ -1488,15 +1488,6 @@ object DigitalVATForm: TDigitalVATForm
     Height = 114
     BevelOuter = bvNone
     TabOrder = 20
-    object cxImage3: TcxImage
-      Left = 16
-      Top = 37
-      Style.BorderStyle = ebsNone
-      Style.Color = clMenu
-      TabOrder = 0
-      Height = 44
-      Width = 49
-    end
     object RetrieveRecieptLabel: TcxLabel
       Left = 0
       Top = 0
@@ -1515,6 +1506,15 @@ object DigitalVATForm: TDigitalVATForm
       Style.IsFontAssigned = True
       Height = 114
       Width = 429
+    end
+    object cxImage3: TcxImage
+      Left = 16
+      Top = 37
+      Style.BorderStyle = ebsNone
+      Style.Color = clMenu
+      TabOrder = 0
+      Height = 44
+      Width = 49
     end
     object btnRetrieveReceipt: TcxButton
       Left = 143
@@ -1589,6 +1589,9 @@ object DigitalVATForm: TDigitalVATForm
       Enabled = False
       OnExecute = actStoreClientCodeExecute
     end
+    object actSync: TAction
+      Caption = 'Sync'
+    end
   end
   object BarManager: TdxBarManager
     AllowReset = False
@@ -1660,6 +1663,11 @@ object DigitalVATForm: TDigitalVATForm
           item
             BeginGroup = True
             Item = blbSettings
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = blbSync
             Visible = True
           end
           item
@@ -1806,6 +1814,16 @@ object DigitalVATForm: TDigitalVATForm
       Category = 0
       Visible = ivAlways
       ItemLinks = <>
+    end
+    object blbSync: TdxBarLargeButton
+      Action = actSync
+      Category = 0
+      AutoGrayScale = False
+      Height = 44
+      HotImageIndex = 44
+      Width = 75
+      SyncImageIndex = False
+      ImageIndex = 44
     end
   end
   object cxStyleRepository1: TcxStyleRepository
