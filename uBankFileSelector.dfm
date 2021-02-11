@@ -67,21 +67,22 @@ object fmBankFileSelector: TfmBankFileSelector
         HeaderAlignmentVert = vaCenter
         Options.Editing = False
         Options.Focusing = False
+        Options.Sorting = False
         Width = 255
       end
       object BankFileGridTableViewFileFormat: TcxGridColumn
         Caption = 'Bank'
         RepositoryItem = AccsDataModule.erBankLookup
         HeaderAlignmentVert = vaCenter
+        Options.Sorting = False
         Width = 145
       end
       object BankFileGridTableViewFileDateTime: TcxGridColumn
-        Caption = 'Created On'
+        Caption = 'Modified On'
         HeaderAlignmentVert = vaCenter
         Options.Editing = False
         Options.Focusing = False
-        SortIndex = 0
-        SortOrder = soDescending
+        Options.Sorting = False
         Width = 125
       end
     end

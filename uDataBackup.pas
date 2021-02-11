@@ -13,6 +13,8 @@
                                                                  without the user getting the MessageDlg below to inform that the company name is different.
 
    26/11/20 [V4.5 R4.6] /MK Change - FormCreate - If the user is an accountant then default the BackupFileName to the Cashbook directory name.
+
+   11/02/21 [V4.5 R5.0] /MK Bug Fix - BackupToCD, BackupToRemovable - Store the backup date in AccsDefaults if the backup was completed.
 }
 
 unit uDataBackup;
@@ -364,6 +366,7 @@ begin
       if ZipDataExecuteAction( DataDirectory, DestinationPath, TRUE, TRUE ) then
          begin
             Result := True;
+            AccsDataModule.AccsDefaultsLastBackupDate := Now;
             RunCmd := cCDBackupExeName + ' ' + '"' + DestinationPath + '"';
             lLastBackupDate.Caption := 'Last Backup Taken:  '+FormatDate(AccsSettings.LastBackUpDate, dsIrish);
             lLastBackupDate.Update;
@@ -431,6 +434,7 @@ begin
 
             if Result = 0 then
                begin
+                  AccsDataModule.AccsDefaultsLastBackupDate := Now;
                   FResult := True;
                   lLastBackupDate.Caption := 'Last Backup Taken:  '+FormatDate(AccsSettings.LastBackUpDate, dsIrish);
                   lLastBackupDate.Update;

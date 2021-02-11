@@ -10,6 +10,8 @@
 
    20/09/19 [V4.5 R0.5] /MK Change - AcceptUserVatAmount - George (TGM) asked that we change this allowed amount from 0.01 to 0.025.
                             Bug Fix - Summarize - Using HeaderIndex instead of line index for tvVATAmtIndex Value.
+
+   11/02/21 [V4.5 R5.0] /MK Bug Fix - FillNominalAccount - When editing an invoice the LineDesc and VatCode would always default to that of the nominal.
 }
 
 unit uSimpleInvoiceBaseFrame;
@@ -1068,8 +1070,11 @@ begin
       begin
          TransGridCell[tvNominalIdIndex] := ANominalId;
          TransGridCell[tvNominalNameIndex] := NominalName;
-         TransGridCell[tvLineDesc] := NominalName;
-         TransGridCell[tvVATCodeIndex] := GetAccountName ( NLFile, ANominalId ,20);
+         //   11/02/21 [V4.5 R5.0] /MK Bug Fix - When editing an invoice the LineDesc and VatCode would always default to that of the nominal.
+         if ( TransGridCell[tvLineDesc] = '' ) then
+            TransGridCell[tvLineDesc] := NominalName;
+         if ( TransGridCell[tvVATCodeIndex] = '' ) then
+            TransGridCell[tvVATCodeIndex] := GetAccountName ( NLFile, ANominalId ,20);
          CheckVATForChanges();
       end
    else
