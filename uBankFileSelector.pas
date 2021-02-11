@@ -14,6 +14,10 @@
    11/01/21 [V4.5 R4.8] /MK Bug Fix - LoadBankFilesToGrid - Sort the MemData by CreationDate in Descending so that the grid starts in this order.
                                                             If we don't do this sort here then when the user highlights a file and clicks import,
                                                             the program switches to sort by name and the wrong file is imported.
+
+   11/02/21 [V4.5 R5.0] /MK Change - LoadBankFilesToGrid - Changed the CreationDate to ModifiedDate.
+                            Bug Fix - LoadBankFilesToGrid - Sort the MemData by ModifiedDate in Descending order on FormDestroy so the right file is selected.
+                                                          - Removed the sorting on the grid as the MemData always puts the grid in the right order.
 }
 
 unit uBankFileSelector;
@@ -25,7 +29,7 @@ uses
   cxContainer, cxEdit, cxLabel, cxGridCustomTableView, cxGridTableView,
   cxControls, cxGridCustomView, StdCtrls, cxButtons, cxClasses,
   cxGridLevel, cxGrid, ActnList, uAccounts, ExtCtrls, uAccsSystem,
-  dxmdaset, cxUtils, db, cxCustomData, dbTables;
+  dxmdaset, cxUtils, db, cxCustomData, dbTables, KRoutines;
 
 type
   TBankFileType = (bfNone,
@@ -144,19 +148,16 @@ begin
       begin
          if ( FIgnoreList.Count > 0 ) then
             begin
-               BankFileGridTableViewFileDateTime.SortOrder := soNone;
-               BankFileGridTableViewFileDateTime.SortIndex := -1;
-
                MemData := TdxMemData.Create(nil);
                with MemData do
                   try
                      ClearMemDataFieldDefs(MemData);
 
                      CreateMemDataFieldDef(MemData,'FileName',ftString,200);
-                     CreateMemDataFieldDef(MemData,'CreationDate',ftDateTime);
+                     CreateMemDataFieldDef(MemData,'ModifiedDate',ftDateTime);
 
-                     MemData.SortedField := 'FileName';
-                     MemData.SortOptions := [soCaseInsensitive];
+                     MemData.SortedField := 'ModifiedDate';
+                     MemData.SortOptions := [soDesc];
 
                      MemData.Open;
                      MemData.First;
@@ -164,7 +165,7 @@ begin
                         try
                            MemData.Append;
                            MemData.FieldByName('FileName').AsString := ExtractFileName(FIgnoreList[i]);
-                           MemData.FieldByName('CreationDate').AsDateTime := GetFileCreationDate(FIgnoreList[i]);
+                           MemData.FieldByName('ModifiedDate').AsDateTime := GetFileModifiedDate(FIgnoreList[i]);
                            MemData.Post;
                         except
                            on e : Exception do
@@ -223,12 +224,12 @@ begin
 
          CreateMemDataFieldDef(MemData,'FileName',ftString,200);
          CreateMemDataFieldDef(MemData,'BankName',ftString,200);
-         CreateMemDataFieldDef(MemData,'CreationDate',ftDateTime);
+         CreateMemDataFieldDef(MemData,'ModifiedDate',ftDateTime);
 
          //   11/01/21 [V4.5 R4.8] /MK Bug Fix - Sort the MemData by CreationDate in Descending so that the grid starts in this order.
          //                                      If we don't do this sort here then when the user highlights a file and clicks import,
          //                                      the program switches to sort by name and the wrong file is imported.
-         MemData.SortedField := 'CreationDate';
+         MemData.SortedField := 'ModifiedDate';
          MemData.SortOptions := [soDesc];
 
          MemData.Open;
@@ -238,7 +239,7 @@ begin
                MemData.Append;
                MemData.FieldByName('FileName').AsString := ExtractFileName(FBankFiles[i]);
                MemData.FieldByName('BankName').AsString := AccsDataModule.LastImportBank;
-               MemData.FieldByName('CreationDate').AsDateTime := GetFileCreationDate(FBankFiles[i]);
+               MemData.FieldByName('ModifiedDate').AsDateTime := GetFileModifiedDate(FBankFiles[i]);
                MemData.Post;
             except
                on e : Exception do
@@ -272,11 +273,8 @@ begin
          // Filename
          BankFileGridTableView.DataController.Values[i, 0] := ExtractFileName(FBankFiles[i]);
          BankFileGridTableView.DataController.Values[i, 1] := AccsDataModule.LastImportBank;
-         BankFileGridTableView.DataController.Values[i, 2] := GetFileCreationDate(FBankFiles[i]);
+         BankFileGridTableView.DataController.Values[i, 2] := GetFileModifiedDate(FBankFiles[i]);
       end;
-
-   BankFileGridTableViewFileDateTime.SortOrder := soDescending;
-   BankFileGridTableViewFileDateTime.SortIndex := 0;
 
    BankFileGridTableView.DataController.FocusedRowIndex := 0;
    BankFileGridTableView.Controller.FocusedColumnIndex := 1;
@@ -412,9 +410,6 @@ begin
    if (BankFileGridTableView.DataController.FocusedRowIndex < 0) then
       Exit;
 
-   BankFileGridTableViewFileDateTime.SortOrder := soNone;
-   BankFileGridTableViewFileDateTime.SortIndex := -1;
-
    SelectedFileName := BankFileGridTableView.DataController.Values[BankFileGridTableView.DataController.FocusedRowIndex, 0];
 
    AddToIgnoreList(IncludeTrailingBackslash(AccsDataModule.DefaultStatementDirectory)+SelectedFileName);
@@ -424,8 +419,6 @@ begin
       begin
          UpdateScreenControls();
          BankFileGrid.SetFocus;
-         BankFileGridTableViewFileDateTime.SortOrder := soDescending;
-         BankFileGridTableViewFileDateTime.SortIndex := 0;
          BankFileGridTableView.DataController.FocusedRowIndex := 0;
          BankFileGridTableView.Controller.FocusedColumnIndex := 1;
       end

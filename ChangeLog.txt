@@ -1,3 +1,10 @@
+[V4.5 R5.0] -
+   11/02/21 /MK Change - uBankFileSelector - LoadBankFilesToGrid - Changed the CreationDate to ModifiedDate.
+                Bug Fix - uBankFileSelector - LoadBankFilesToGrid - Sort the MemData by ModifiedDate in Descending order on FormDestroy so the right file is selected.
+                                                                  - Removed the sorting on the grid as the MemData always puts the grid in the right order.
+                        - uDataBackup - BackupToCD, BackupToRemovable - Store the backup date in AccsDefaults if the backup was completed.
+                        - uSimpleInvoiceBaseFrame - FillNominalAccount - When editing an invoice the LineDesc and VatCode would always default to that of the nominal.
+
 [V4.5 R4.9] -
    19/01/21 /AB Additional Feature - FullAudit - If journals were entered show them on the new detailed audit.
    03/02/21 /AB Bug Fix- InvoiceLayout - When in Invoice Layouts, click Change, click the X to close the screen, go back into Invoice Layouts, db is still in edit mode. Now cancels the editing on exit.
