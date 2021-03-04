@@ -46,6 +46,8 @@ unit uLedgerReport;
 
    04/09/20 /AB Bug Fix - Ch029 - Bug fix within statement report. Running a report between 2 dates with no transactions the balances picked up is the current balance not the point in time balance
                                 - Changes marked Ch029
+
+   04/03/21 /AB Additional Feature - Changes marked Ch032.                             
 }
 
 interface
@@ -100,6 +102,7 @@ type
     TotalLinePrice: TQRDBText;
     GreenLineLabel: TQRDBText;
     HeaderImage: TQRImage;
+    QRDBText16: TQRDBText;
   private
     procedure EnterAccountDetails(header : boolean);
     procedure EnterStatementHeader(header : boolean);
@@ -147,6 +150,8 @@ var
   StatementReportUseGraphic : Boolean;                 // TGM AB 17/03/17
   FilterFirstTxOfYear : Integer;                       // TGM AB 07/04/17
   LedgerPageLineLimit : Integer;                       // TGM AB 14/04/17
+  IncStatementComment : Boolean;                       // Ch032
+  StatementComment : String;                           // Ch032
 
 implementation
 
@@ -159,6 +164,7 @@ var
    i : integer;
    OutputRecord : boolean;
 begin
+
 
      GlobalFirstTxYear := FullAudit.AuditFiles.FirstTxThisYear;  //TGM AB 18/10/16
      GlobalFirstTxLastYear := FullAudit.AuditFiles.FirstTxLastYear;  //TGM AB 18/10/16
@@ -434,7 +440,7 @@ begin
    // Filter Txs
    Accsdatamodule.LedgerReportQuery.close;
    Accsdatamodule.LedgerReportQuery.sql.clear;
-                                            
+
    Accsdatamodule.CustSuppTempTableDB.close;
    Accsdatamodule.CustSuppTempTableDB.EmptyTable;
    Accsdatamodule.CustSuppTempTableDB.open;
@@ -858,6 +864,22 @@ begin
 
    // end TGM AB 17/03/17
 
+   //Ch032 start
+
+   if AccsDataModule.Statement['IncludeComment'] = true then begin
+          IncStatementComment := True;
+
+          try StatementComment := AccsDataModule.Statement.fieldbyname('Comment').asstring;
+          except    StatementComment :=  '';
+          end;
+
+   end
+        else begin
+                IncStatementComment := False;
+                StatementComment := '';
+        end;
+
+    //Ch032 end
 
    GlobalFirstTxYear := FullAudit.AuditFiles.FirstTxThisYear;  //TGM AB 18/10/16
    GlobalFirstTxLastYear := FullAudit.AuditFiles.FirstTxLastYear;  //TGM AB 18/10/16
@@ -1614,6 +1636,10 @@ begin
 end;
 
 procedure TLedgerReport.EnterStatementFooter;   // last page only only
+var                             //Ch032
+        j, crlf : integer;      //Ch032
+        tempstring : string;    //Ch032
+        Comment : string;       //Ch032
 
 begin
 
@@ -1845,6 +1871,74 @@ begin
         Accsdatamodule.LedgerReportDB['LineType'] := 'fx'; // TGM AB 02/09/16
         Accsdatamodule.LedgerReportDB.post;
         PageLineCount := PageLineCount + 1;
+
+        //Ch032 starts here
+
+        CRLF := 1;
+
+        if IncStatementComment then begin
+
+             if length(StatementComment) > 0 then begin
+
+                // add blank line
+
+                Accsdatamodule.LedgerReportDB.Append;
+                Accsdatamodule.LedgerReportDB.post;
+                PageLineCount := PageLineCount + 1;
+
+                Comment := StatementComment;
+
+                TempString := Comment;
+
+                while length(Comment) > 0 do begin
+
+                        for j:= 0 to length(Comment) do begin
+
+                                if Comment[j] = #$D then begin
+
+                                        TempString := copy(Comment,CRLF,j-CRLF);
+
+
+                                        Accsdatamodule.LedgerReportDB.Append;
+                                        Accsdatamodule.LedgerReportDB['CommentLabel'] := Tempstring;
+                                        Accsdatamodule.LedgerReportDB['LineType'] := 'fx';
+                                        Accsdatamodule.LedgerReportDB.post;
+                                        PageLineCount := PageLineCount + 1;
+
+                                        CRLF := j + 2;
+
+                                        TempString := copy(Comment,CRLF,length(Comment));
+
+                                    //    If tempstring = '' then Comment := '';
+
+                                end;    // if
+
+                        end;  // for
+
+                        If TempString <> '' then begin
+                                        Accsdatamodule.LedgerReportDB.Append;
+                                        Accsdatamodule.LedgerReportDB['CommentLabel'] := Tempstring;
+                                        Accsdatamodule.LedgerReportDB['LineType'] := 'fx';
+                                        Accsdatamodule.LedgerReportDB.post;
+                                        PageLineCount := PageLineCount + 1;
+                                        TempString := '';
+                                    //    Comment := '';
+                        end;
+
+                        If tempstring = '' then break;
+
+                end;  // while
+
+
+
+            end;  // if
+
+
+        end;
+
+        if pagelinecount > StatementPageLineLimit then  pagelinecount := pagelinecount - StatementPageLineLimit;
+
+        //Ch032 ends here
 
 
 end;

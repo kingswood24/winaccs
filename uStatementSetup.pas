@@ -1,5 +1,7 @@
 unit uStatementSetup;
 
+// Ch032 - added tick box, memo etc onto form to add comment onto the statements
+
 interface
 
 uses
@@ -37,6 +39,9 @@ type
     DBEdit7: TDBEdit;
     BrowseBtn: TBitBtn;
     OpenDialog1: TOpenDialog;
+    Label41: TLabel;
+    DBCheckBox24: TDBCheckBox;
+    DBMemo1: TDBMemo;
     procedure ExitButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure BrowseBtnClick(Sender: TObject);
@@ -52,7 +57,7 @@ var
 
 implementation
 
-uses NewRepUnit,Vars;  
+uses NewRepUnit,Vars;
 
 {$R *.DFM}
 
@@ -89,6 +94,7 @@ begin
               Accsdatamodule.Statement.FieldValues['StatementFrom'] := True;
               Accsdatamodule.Statement.FieldValues['Name'] := Cash1.XCompany;
               Accsdatamodule.Statement.FieldValues['UseGraphicsFile'] := False;        // TGM AB 17/03/17
+              Accsdatamodule.Statement.FieldValues['IncludeComment'] := False;         // Ch032
      end else Accsdatamodule.Statement.edit;
 end;
 

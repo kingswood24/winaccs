@@ -20,7 +20,9 @@
    28/07/20 [V4.5 R3.2] /MK Bug Fix - DeleteServicesFolder - Only delete the services folder if its not figured - Catriona Hughes had an issue where the folder
                                                              was being deleted when she opened the Farm accounts company.                                            
 
-   30/07/20 [V5.9 R5.1] /MK Change - RunButtonClick - If the user has the Kac.config file and a serial number between 100 and 999 i.e. accountant, don't show "Data Path does not match" message.
+   30/07/20 [V4.5 R3.4] /MK Change - RunButtonClick - If the user has the Kac.config file and a serial number between 100 and 999 i.e. accountant, don't show "Data Path does not match" message.
+
+   04/03/21 [V4.5 R5.1] /AB Change - CheckForNewFields added field update for AllocatedVAT-1 - Ch006(P)
 }
 
 Unit Chkcomp;
@@ -992,13 +994,42 @@ begin
    Checkdatabasefields(AccsDataModule.TransactionsDB,DBTableName,'VATProcessed','Boolean','');
    Checkdatabasefields(AccsDataModule.TransactionsDB,DBTableName,'ReturnID','Integer','');
 
-   if fileexists(progpath + CheckCompanyName.text + '\Year-1.db') then begin 
+   if fileexists(progpath + CheckCompanyName.text + '\Year-1.db') then begin
 
    DBTableName:='"'+ progpath + CheckCompanyName.text + '\Year-1.db"';
    Checkdatabasefields(AccsDataModule.TransactionsYr1DB,DBTableName,'VATProcessed','Boolean','');
    Checkdatabasefields(AccsDataModule.TransactionsYr1DB,DBTableName,'ReturnID','Integer','');
    end;
    // End TGM AB Ch006
+
+
+   // Ch006(P) Start
+
+   if fileexists(progpath + CheckCompanyName.Text + '\AllocatedVAT.db') then begin
+
+   DBTableName:='"'+ progpath + CheckCompanyName.text + '\AllocatedVAT.db"';
+   Checkdatabasefields(AccsDataModule.AllocatedVATDB,DBTableName,'VATProcessed','Boolean','');
+   Checkdatabasefields(AccsDataModule.AllocatedVATDB,DBTableName,'ReturnID','Integer','');
+
+   end;
+
+   if fileexists(progpath + CheckCompanyName.Text + '\AllocatedVAT-1.db') then begin
+
+   DBTableName:='"'+ progpath + CheckCompanyName.text + '\AllocatedVAT-1.db"';
+   Checkdatabasefields(AccsDataModule.AllocatedVATDBYr1,DBTableName,'VATProcessed','Boolean','');
+   Checkdatabasefields(AccsDataModule.AllocatedVATDBYr1,DBTableName,'ReturnID','Integer','');
+
+   end;
+
+   // Ch006(P) End
+
+   // Ch032 start
+
+   DBTableName:='"'+ progpath + CheckCompanyName.text + '\Statement.db"';
+   Checkdatabasefields(AccsDataModule.Statement,DBTableName,'IncludeComment','Boolean','False');
+   Checkdatabasefields(AccsDataModule.Statement,DBTableName,'Comment','Blob','');
+
+   // Ch032 end
 
 
 end;

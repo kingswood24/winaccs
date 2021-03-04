@@ -77,6 +77,9 @@
    18/09/20 [V4.5 R3.9] /MK Additional Feature - AddBankLinkDefaults - Add Danske defaults - George (TGM).                                
 
    26/11/20 [V4.5 R4.6] /MK Change - CreatePreferenceDefaults - Default new ShowBankLinkFileNotFound pref to True so TfmBankLinkNoFileFound appears before user can press "Don't show this again".
+
+   04/03/21 [V4.5 R5.1] / AB Change - New Table AllocatedVATDBYr1 added for Payment Based MTD - Ch006(P)
+                                    - Procedure GatherPreviousYears updated to also copy forward AllocatedVAT table from last year
 }
 
 unit AccsData;
@@ -403,6 +406,8 @@ type
     VATArchiveDB: TTable;
     VATTotalsArchiveDB: TTable;
     HMRCReceipts: TTable;
+    AllocatedVATDBYr1: TTable;
+    LedgerReportDBCommentLabel: TStringField;          //Ch006(P)
     procedure BudgetsBeforePost(DataSet: TDataSet);
     procedure BudgetsCalcFields(DataSet: TDataSet);
     procedure BudgetsYearBudgetValidate(Sender: TField);
@@ -477,6 +482,7 @@ type
     procedure DefaultsDBAfterPost(DataSet: TDataSet);                      // Ch026
     procedure GroupsDBAfterPost(DataSet: TDataSet);                        // Ch026
     procedure AccsDefaultsAfterPost(DataSet: TDataSet);                    // Ch026
+    procedure AllocatedVATDBYr1AfterPost(DataSet: TDataSet);               // Ch026
   private
     { Private declarations }
     FExpenseLineIds: TIntArray;
@@ -1527,6 +1533,7 @@ begin
                   Add('GreenLineLabel',ftString,150,False);     // TGM AB 15/04/16
                   Add('LineType',ftString,2,False);             // TGM AB 02/09/16
                   Add('AccNo',ftInteger,0,FALSE);               // TGM AB 02/09/16
+                  Add('CommentLabel',ftString,255,False);       // Ch032
                end;
                
             if (Exists) then DeleteTable;
@@ -4980,6 +4987,17 @@ begin
            end;
         end;
 
+        // Ch006(P) - Bring forward AllocatedVAT for MTD
+        tempint := Cash1.xFinYear;
+        dec(tempint);   // move to last year
+        if not fileexists('c:\kingsacc\' + RFarmGate.pLocation[2] + '\AllocatedVAT-1.db') then begin
+           DataDir := Copy ( RFarmGate.pLocation[2],1,3) + IntToStr(Tempint);
+           if fileexists('c:\kingsacc\' + datadir + '\AllocatedVAT.db') then begin
+                copyfile(pchar('c:\kingsacc\' + datadir + '\AllocatedVAT.db'),pchar('c:\kingsacc\' + vartostr(RFarmGate.pLocation[2]) + '\AllocatedVAT-1.db'),true);
+           end;
+        end;
+        // end Ch006(P)
+
 end;
 
 procedure TAccsDataModule.NLFileDBAfterInsert(DataSet: TDataSet);
@@ -5099,6 +5117,8 @@ begin
                   Add('PreviousYear',ftBoolean,0,false);
                   Add('AllocatedDate',ftDate,0,false);
                   Add('CreditNote',ftBoolean,0,false);
+                  Add('VATProcessed',ftBoolean,0,false);           // Ch006(P)
+                  Add('ReturnID',ftInteger,0,FALSE);               // Ch006(P)
                 end;
             CreateTable;
          end;
@@ -6128,6 +6148,27 @@ begin
       except
          MessageDlg('Error updating "'+  UpdateTable.TableName +'" table schema. Field "APISecret" could not be created.',mtError,[mbOK],0);
       end;
+
+      // Ch015
+      if ( not(FieldExists('PreviousVATMarked')) ) then
+      try
+         AddFieldsQuery.SQL.Clear;
+         AddFieldsQuery.SQL.Text := 'ALTER TABLE '+UpdateTable.TableName+' ADD PreviousVATMarked Boolean';
+         AddFieldsQuery.ExecSQL;
+      except
+         MessageDlg('Error updating "'+  UpdateTable.TableName +'" table schema. Field "PreviousVATMarked" could not be created.',mtError,[mbOK],0);
+      end;
+
+      if ( not(FieldExists('FirstReturnCompleted')) ) then
+      try
+         AddFieldsQuery.SQL.Clear;
+         AddFieldsQuery.SQL.Text := 'ALTER TABLE '+UpdateTable.TableName+' ADD FirstReturnCompleted Boolean';
+         AddFieldsQuery.ExecSQL;
+      except
+         MessageDlg('Error updating "'+  UpdateTable.TableName +'" table schema. Field "FirstReturnCompleted" could not be created.',mtError,[mbOK],0);
+      end;
+      // Ch015 end
+
 end;
 
 function TAccsDataModule.GetLastImportBank: string;
@@ -8786,6 +8827,11 @@ begin
      finally
        Free;
      end;
+end;
+
+procedure TAccsDataModule.AllocatedVATDBYr1AfterPost(DataSet: TDataSet);    //Ch006(P)
+begin
+   DbiSaveChanges(AllocatedVATDBYr1.Handle);
 end;
 
 end.

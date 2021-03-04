@@ -988,6 +988,7 @@ Var
    PCount, i, rowcount : Integer;
    j : integer; //TGM AB 01/01/15
    MyQuery : TQuery;       // Ch006
+ //  IsAllocated, IsInVATReturn : Boolean;   // Ch0XX
 
 begin
      // try and open the Products Tables
@@ -1156,6 +1157,108 @@ begin
 
            // End TGM AB
 
+
+     (*
+     //Ch0XX starts here
+
+        IsAllocated := false;
+        IsInVATReturn := false;
+
+        // check for presented comes from above - NoPresented = false then stop editing
+
+        // check for being included in VAT Return
+
+        // Check to see if transaction has been presented in a VAT Return / Closed Period
+
+
+               MyQuery := TQuery.create(self);
+               Myquery.DatabaseName := accsdatamodule.AccsDataBase.databasename;
+               MyQuery.SQL.clear;
+               MyQuery.SQL.add ('Select * From Transactions where VATProcessed = ''True'' and TxNo >= ' + vartostr(TxEditRec.TransF) + ' and TxNo <= ' + vartostr(TxEditRec.TransT));
+               MyQuery.open;
+
+               if MyQuery.recordcount > 0 then IsInVATReturn := True;
+
+               MyQuery.close;
+               MyQuery.free;
+
+
+        // check to see if transaction has been allocated
+
+          if (cash2.xAllocation) then begin
+
+           // invoices
+
+           SetDB(TxFile);
+           ReadRec ( TxFile, TxEditRec.TransF );
+           getitem(TxFile,1);
+           if ((prog = SalesTX) and (currint = 1)) or ((prog = PurchTX) and (currint = 5)) then begin
+
+               if ((TxEditRec.transtype = 'Cash Sale') or (TxEditRec.transtype = 'Cash Purchase')) then begin
+
+                  if MessageBox(self.handle,'This Cash Transaction has already been allocated - Do you wish to unallocate and then edit it?', 'Kingswood Accounts',                  // TGM AB 18/08/17
+                       MB_YESNO + MB_DEFBUTTON2) = mrYes then begin                                                                                                                  // TGM AB 18/08/17
+
+                          if prog = SalesTX then EditAllocatedTransaction(TxEditRec.TransF,'CASHREC')
+                              else EditAllocatedTransaction(TxEditRec.TransF,'CASHPAY');
+                              Exitbutton.Enabled := false;
+
+                     end else save.Enabled := false;
+               end
+                  else begin
+                                getitem(TxFile,30);
+                                if ansiuppercase(currdisp[1]) = 'Y' then begin
+                                   save.Enabled := false;
+                                   ShowMessage('This Transaction already has payment allocated and cannot be edited');
+                       end
+                          else begin
+                                    getitem(TxFile,29);
+                                    if currlong <> 0 then begin
+                                    save.Enabled := false;
+                                    ShowMessage('This Transaction already has payment allocated and cannot be edited');
+                                    end;
+                               end;
+                       end;
+           end;
+
+           // Payments
+
+           SetDB(TxFile);
+           ReadRec ( TxFile, TxEditRec.TransF );
+           getitem(TxFile,1);
+
+           if ((prog = SalesTX) and (currint = 2)) or ((prog = SalesTX) and (currint = 12)) or ((prog = PurchTX) and (currint = 6)) or ((prog = PurchTX) and (currint = 16)) then begin
+
+           PaymentQuery.close;
+           PaymentQuery.DatabaseName := accsdatamodule.AccsDataBase.databasename;
+           PaymentQuery.SQL.clear;
+           PaymentQuery.SQL.Add('Select * from AllocatedVAT where PaymentID = ' + vartostr(TxEditRec.TransF));
+           PaymentQuery.open;
+           If PaymentQuery.RecordCount > 0 then begin
+                  save.Enabled := false;
+           //       if MessageDlg('This Transaction has already been allocated - Do you wish to zeroise this transaction to allow it to be unallocated and then edited?',                                          // TGM AB 18/08/17
+           //          mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin                                                                                                                                        // TGM AB 18/08/17
+                 if MessageBox(self.handle,'This Transaction has already been allocated - Do you wish to zeroise this transaction to allow it to be unallocated and then edited?', 'Kingswood Accounts',           // TGM AB 18/08/17
+                       MB_YESNO + MB_DEFBUTTON2) = mrYes then begin                                                                                                                                                // TGM AB 18/08/17
+                           if prog = SalesTX then EditAllocatedTransaction(TxEditRec.TransF,'REC')
+                              else EditAllocatedTransaction(TxEditRec.TransF,'PAY');
+                              Exitbutton.Enabled := false;
+                           end;
+              end;
+           PaymentQuery.close;
+           PaymentQuery.SQL.clear;
+
+          end;
+
+
+
+
+     //Ch0XX ends here
+
+    *)
+
+
+
            if NOT NoPresented then
               ShowMessage('This Transaction is Presented' + #13 +
                           'You have to UnPresent it before editing');
@@ -1261,6 +1364,8 @@ begin
            end;
 
            // End Ch006
+
+
 
      end;
 //tgm 12/10/01
