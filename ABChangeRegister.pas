@@ -89,6 +89,9 @@ Ch030 - Enterprise Reports bug where enterprise units is used & selecting a sing
 15/01/21 - added check for journals to debtors / creditors control as part of extended Data Integrity Check
 
 Ch031 - Bug fix : fix bug when in Invoice Layouts, click Change, click the X to close the screen, go back into Invoice Layouts, db is still in edit mode. Now cancels the editing on exit.
+
+Ch032 - Added extra option within statements to add comment field on the bottom (as per invoices) to add bank details etc
+
 *)
 
 interface

@@ -1,3 +1,7 @@
+[V4.5 R5.1] -
+   04/03/21 /AB Additional Feature - uStatementSetup, uLedgerReport - Changes marked Ch032.
+                                   - Comment Field added to Statement.
+
 [V4.5 R5.0] -
    11/02/21 /MK Change - uBankFileSelector - LoadBankFilesToGrid - Changed the CreationDate to ModifiedDate.
                 Bug Fix - uBankFileSelector - LoadBankFilesToGrid - Sort the MemData by ModifiedDate in Descending order on FormDestroy so the right file is selected.
