@@ -163,6 +163,8 @@ type
     vgPreferencesUseSalePurchInvGrids: TcxEditorRow;
     MTDUsernameAndPasswordButton: TcxButton;
     actMTDUsernameAndPassword: TAction;
+    cxButton4: TcxButton;
+    actBillingAppLoginDetails: TAction;
     procedure actSave2Execute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -210,6 +212,7 @@ type
       Sender: TObject);
     procedure actEnterKingswoodMTDClientCodeExecute(Sender: TObject);
     procedure actMTDUsernameAndPasswordExecute(Sender: TObject);
+    procedure actBillingAppLoginDetailsExecute(Sender: TObject);
   private
     { Private declarations }
     FFormShowing : Boolean;
@@ -1123,6 +1126,14 @@ procedure TfmSysMain.actMTDUsernameAndPasswordExecute(Sender: TObject);
 begin
    //   14/10/20 [V4.5 R4.3] /MK Change - Changed prompt, validate and store of Username and Password to new AccsUtils function.
    if ( Prompted_Validated_Saved_MTDCredentials(AccsDataModule.CurrentDatabasePath) ) then
+      MessageDlg('Login credentials successfully stored.',mtInformation,[mbok],0)
+   else
+      MessageDlg('An error occurred while storing information.',mtError,[mbOK],0);
+end;
+
+procedure TfmSysMain.actBillingAppLoginDetailsExecute(Sender: TObject);
+begin
+   if ( Prompted_Validated_Saved_BillingAppCredentials(AccsDataModule.CurrentDatabasePath) ) then
       MessageDlg('Login credentials successfully stored.',mtInformation,[mbok],0)
    else
       MessageDlg('An error occurred while storing information.',mtError,[mbOK],0);

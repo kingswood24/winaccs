@@ -1654,6 +1654,16 @@ inherited fmSysMain: TfmSysMain
           LookAndFeel.Kind = lfFlat
           LookAndFeel.NativeStyle = True
         end
+        object cxButton4: TcxButton
+          Left = 236
+          Top = 256
+          Width = 189
+          Height = 32
+          Action = actBillingAppLoginDetails
+          TabOrder = 5
+          LookAndFeel.Kind = lfFlat
+          LookAndFeel.NativeStyle = True
+        end
       end
     end
     object tsMaintenance: TcxTabSheet
@@ -2200,6 +2210,10 @@ inherited fmSysMain: TfmSysMain
     object actMTDUsernameAndPassword: TAction
       Caption = 'MTD Username && Password'
       OnExecute = actMTDUsernameAndPasswordExecute
+    end
+    object actBillingAppLoginDetails: TAction
+      Caption = 'Billing App Username && Password'
+      OnExecute = actBillingAppLoginDetailsExecute
     end
   end
   object cxStyleRepository1: TcxStyleRepository

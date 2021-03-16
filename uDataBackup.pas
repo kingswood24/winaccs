@@ -15,6 +15,8 @@
    26/11/20 [V4.5 R4.6] /MK Change - FormCreate - If the user is an accountant then default the BackupFileName to the Cashbook directory name.
 
    11/02/21 [V4.5 R5.0] /MK Bug Fix - BackupToCD, BackupToRemovable - Store the backup date in AccsDefaults if the backup was completed.
+
+   12/03/21 [V4.5 R5.2] /MK Change - Remove Accountant Link button - GL/Maretta (Peter Robinson). 
 }
 
 unit uDataBackup;

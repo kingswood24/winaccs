@@ -1059,7 +1059,7 @@ begin
       end;
       3:  // awaiting input of bundle code
       begin
-         if (TCredentialsStore.IsStoredFor(AccsDataModule.CurrentDatabasePath)) then
+         if (TCredentialsStore.IsStoredFor(AccsDataModule.CurrentDatabasePath,cstMTD)) then
             begin
                pCompletionAPIWaiting.Visible := True;
             end
@@ -1710,7 +1710,7 @@ begin
    if (not FSubmitAttempted) then Exit;
 
    //   30/09/20 [V4.5 R4.1] /MK Change - Changed the assignment of LoginCredentials to Submit Return button so only check that LoginCredentials <> nil.
-   LoginCredentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath);
+   LoginCredentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath,cstMTD);
    if ( LoginCredentials = nil ) then Exit;
 
    Screen.Cursor := crHourGlass;

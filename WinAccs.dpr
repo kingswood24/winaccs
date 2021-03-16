@@ -216,7 +216,8 @@ uses
   Win7 in '..\..\..\Common\Win7.pas',
   uWinOS in '..\..\..\Common\uWinOS.pas',
   uCallToExternalProgram in '..\..\..\Common\uCallToExternalProgram.pas',
-  KRoutines in '..\..\..\..\Common\KRoutines.pas';
+  KRoutines in '..\..\..\..\Common\KRoutines.pas',
+  uAccountsAPI in 'uAccountsAPI.pas';
 
 // TGM AB 04/06/15
 

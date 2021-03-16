@@ -14,7 +14,7 @@ interface
 uses
    Windows, Classes, Dialogs, Types, Forms, WinInet, NB30,
    LoginCredentials, uLoginCredentials, uMTDApi, Controls,
-   CredentialsStore;
+   CredentialsStore, uAccountsAPI;
 
 type
   TStringArray = Array of String;
@@ -92,6 +92,7 @@ type
   function GetDownloadedCSVDir : string;
 
   function Prompted_Validated_Saved_MTDCredentials (ADatabasePath : String) : Boolean;
+  function Prompted_Validated_Saved_BillingAppCredentials (ADatabasePath : String) : Boolean;
 
 const
    CSIDL_DESKTOP = $00;
@@ -1023,7 +1024,7 @@ var
 begin
    Result := False;
    if ( Length(ADatabasePath) = 0 ) then Exit;
-   MTDCredentials := TfmLoginCredentials.Show(ADatabasePath);
+   MTDCredentials := TfmLoginCredentials.Show(ADatabasePath,cstMTD);
    if (MTDCredentials=nil) then Exit;
    Screen.Cursor := crHourGlass;
    MTDApi := TMTDApi.create(MTDCredentials);
@@ -1031,11 +1032,33 @@ begin
       //   20/10/20 [V4.5 R4.4] /MK Bug Fix - Result of MTDApi.ValidateCredentials() was being returned as reverse.
       Result := ( MTDApi.ValidateCredentials() );
       if ( not(Result) ) then Exit;
-      Result := TCredentialsStore.Save(MTDCredentials, ADatabasePath);
+      Result := TCredentialsStore.Save(MTDCredentials, ADatabasePath,cstMTD);
    finally
       Screen.Cursor := crDefault;
       MTDApi.Free;
       MTDCredentials.Free;
+   end;
+end;
+
+function Prompted_Validated_Saved_BillingAppCredentials (ADatabasePath : String) : Boolean;
+var
+   AppCredentials: TLoginCredentials;
+   AccountsApi : TAccountsAPI;
+begin
+   Result := False;
+   if ( Length(ADatabasePath) = 0 ) then Exit;
+   AppCredentials := TfmLoginCredentials.Show(ADatabasePath,cstBilling);
+   if (AppCredentials=nil) then Exit;
+   Screen.Cursor := crHourGlass;
+   AccountsApi := TAccountsAPI.create(AppCredentials);
+   try
+      Result := ( AccountsApi.ValidateCredentials() );
+      if ( not(Result) ) then Exit;
+      Result := TCredentialsStore.Save(AppCredentials, ADatabasePath,cstBilling);
+   finally
+      Screen.Cursor := crDefault;
+      AccountsApi.Free;
+      AppCredentials.Free;
    end;
 end;
 

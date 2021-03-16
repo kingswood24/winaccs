@@ -30,9 +30,10 @@ type
     procedure btnEditClick(Sender: TObject);
   private
     { Private declarations }
+    FCredentialsStoreType : TCredentialsStoreType;
   public
     { Public declarations }
-    class function Show (ADatabasePath : String) : TLoginCredentials;
+    class function Show (ADatabasePath : String; ACredentialsStoreType : TCredentialsStoreType) : TLoginCredentials;
   end;
 
 var
@@ -58,7 +59,8 @@ begin
       end;
 end;
 
-class function TfmLoginCredentials.Show (ADatabasePath : String) : TLoginCredentials;
+class function TfmLoginCredentials.Show (ADatabasePath : String;
+   ACredentialsStoreType : TCredentialsStoreType) : TLoginCredentials;
 var
    CurLoginCredentials : TLoginCredentials;
 begin
@@ -67,8 +69,9 @@ begin
       try
          usernameTextEdit.Enabled := True;
          passwordTextEdit.Enabled := True;
-         
-         CurLoginCredentials := TCredentialsStore.Load(ADatabasePath);
+
+         FCredentialsStoreType := ACredentialsStoreType;
+         CurLoginCredentials := TCredentialsStore.Load(ADatabasePath,ACredentialsStoreType);
          if ( CurLoginCredentials <> nil ) then
             try
                usernameTextEdit.Text := CurLoginCredentials.Username;

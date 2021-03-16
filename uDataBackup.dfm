@@ -588,11 +588,6 @@ object fmDataBackup: TfmDataBackup
           end
           item
             BeginGroup = True
-            Item = blbAccountantLink
-            Visible = True
-          end
-          item
-            BeginGroup = True
             Item = blbUndoPoints
             Visible = True
           end>

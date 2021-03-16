@@ -93,7 +93,7 @@ uses
   uBudgetTypes, AccsUtils, uAccsSettings, uQuantityInput, MSXML2_TLB,
   ComObj, ShellAPI, Types, HHPack, igHHInt, LMDWebHTTPGet, LMDDownload,
   LMDWebConfig, LMDWebDownloadFormUnit, uSysMain, IniFiles, KRoutines,
-  ProgramUpdateThread, ProgramMaintenanceCheckThread, uMTDApi;
+  ProgramUpdateThread, ProgramMaintenanceCheckThread, uMTDApi, uAccountsAPI;
 
 type
   ErrorMsg = class(Exception);
@@ -760,6 +760,8 @@ type
 
     function MTDVATSubmissionReceiptPending(
        const APeriodStart, APeriodEnd: TDateTime): Boolean;
+
+    function ImportCustomersForBillingUser : Boolean;
 
     property DefaultEntCode : string read FDefaultEntCode write FDefaultEntCode;
     property LastImportBank : string read GetLastImportBank write SetLastImportBank;
@@ -8651,15 +8653,14 @@ var
 
    PeriodStart: TDateTime;
    PeriodEnd: TDateTime;
-
 begin
-  Receipt := nil;
-  SetLength(Receipts, 0);
-  VatReturnChanged := False;
-  VATReturnDB.close();
+   Receipt := nil;
+   SetLength(Receipts, 0);
+   VatReturnChanged := False;
+   VATReturnDB.close();
    try
       //Credentials := TLoginCredentials.create('254312584','s6f6a6n3');
-      Credentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath);
+      Credentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath,cstMTD);
       if ( Credentials = nil ) then
          begin
             Result := crLoginCredentialMissing;
@@ -8801,11 +8802,11 @@ begin
         finally
           Free;
         end;
-    finally
-       VATReturnDB.open();
-       for i := 0 to Length(Receipts)-1 do Receipts[i].Free;
-         SetLength(Receipts, 0);
-    end;
+   finally
+      VATReturnDB.open();
+      for i := 0 to Length(Receipts)-1 do Receipts[i].Free;
+        SetLength(Receipts, 0);
+   end;
 end;
 
 function TAccsDataModule.MTDVATSubmissionReceiptPending(
@@ -8832,6 +8833,35 @@ end;
 procedure TAccsDataModule.AllocatedVATDBYr1AfterPost(DataSet: TDataSet);    //Ch006(P)
 begin
    DbiSaveChanges(AllocatedVATDBYr1.Handle);
+end;
+
+function TAccsDataModule.ImportCustomersForBillingUser: Boolean;
+var
+   AppCustomers : TCustomers;
+   Api: TAccountsAPI;
+   Credentials: TLoginCredentials;
+begin
+   Result := False;
+
+   try
+      Credentials := TCredentialsStore.Load(AccsDataModule.CurrentDatabasePath,cstBilling);
+      if ( Credentials = nil ) then
+         begin
+            Result := False;
+            Exit;
+         end;
+
+      try
+         Api := TAccountsAPI.create(Credentials);
+         AppCustomers := Api.GetCustomers();
+         Result := ( Length(AppCustomers) > 0 ); 
+      finally
+         FreeAndNil(Api);
+         FreeAndNil(Credentials);
+      end;
+   finally
+
+   end;
 end;
 
 end.
